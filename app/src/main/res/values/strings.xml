@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">GFE Attendance Manager</string>
+    <string name="workshop_title">GALAXY FABRICATION EXPERTS</string>
+
+    <!-- Main Activity -->
+    <string name="cd_refresh">Refresh</string>
+    <string name="cd_settings">Settings</string>
+    <string name="status_offline_cached">○ Offline (Cached)</string>
+    <string name="status_synced">● Synced</string>
+
+    <!-- Staff Button Adapter -->
+    <string name="status_in_since">● IN %1$s</string>
+    <string name="status_in">● IN</string>
+    <string name="status_out">○ OUT</string>
+
+    <!-- Advance Dialog -->
+    <string name="record_cash_advance_title">Record Cash Advance for %1$s</string>
+    <string name="quick_amount_presets">Quick Amount Presets:</string>
+    <string name="preset_100">₹100</string>
+    <string name="preset_200">₹200</string>
+    <string name="preset_500">₹500</string>
+    <string name="preset_1000">₹1000</string>
+    <string name="amount_100">100</string>
+    <string name="amount_200">200</string>
+    <string name="amount_500">500</string>
+    <string name="amount_1000">1000</string>
+    <string name="hint_enter_amount">Enter Amount</string>
+    <string name="advance_given_by">Advance Given By:</string>
+    <string name="name_sandeep">Sandeep</string>
+    <string name="name_harjeet">Harjeet</string>
+    <string name="name_jaspreet">Jaspreet</string>
+    <string name="name_jaskaran">Jaskaran</string>
+    <string name="confirm_advance" tools:ignore="ButtonCasing">CONFIRM ADVANCE</string>
+    <string name="cancel" tools:ignore="ButtonCasing">CANCEL</string>
+    <string name="please_enter_valid_amount">Please enter a valid amount</string>
+
+    <!-- Admin Settings Dialog -->
+    <string name="admin_security_gate">Admin Security Gate</string>
+    <string name="enter_admin_pin">Enter Admin PIN to access settings</string>
+    <string name="hint_admin_pin">Admin PIN</string>
+    <string name="incorrect_pin">Incorrect PIN. Try again.</string>
+    <string name="submit_pin" tools:ignore="ButtonCasing">SUBMIT PIN</string>
+    <string name="admin_settings">Admin Settings</string>
+    <string name="configure_server_url">Configure Server URL or system settings.</string>
+    <string name="hint_server_url">Server Base URL</string>
+    <string name="save_url" tools:ignore="ButtonCasing">SAVE URL</string>
+    <string name="exit_kiosk_system_settings" tools:ignore="ButtonCasing">EXIT KIOSK / OPEN SYSTEM SETTINGS</string>
+    <string name="close" tools:ignore="ButtonCasing">CLOSE</string>
+    <string name="server_url_updated_successfully">Server URL updated successfully</string>
+    <string name="server_url_saved_toast">Server URL Saved: %1$s</string>
+    <string name="please_enter_valid_url">Please enter a valid URL</string>
+    <string name="unable_to_open_system_settings">Unable to open system settings</string>
+
+    <!-- Staff Action Dialog -->
+    <string name="clocked_in_since">Clocked IN since %1$s</string>
+    <string name="clocked_in">Clocked IN</string>
+    <string name="currently_clocked_out">Currently Clocked OUT</string>
+    <string name="clock_in" tools:ignore="ButtonCasing">CLOCK IN</string>
+    <string name="clock_out" tools:ignore="ButtonCasing">CLOCK OUT</string>
+    <string name="add_advance" tools:ignore="ButtonCasing">₹ ADD ADVANCE</string>
+</resources>
