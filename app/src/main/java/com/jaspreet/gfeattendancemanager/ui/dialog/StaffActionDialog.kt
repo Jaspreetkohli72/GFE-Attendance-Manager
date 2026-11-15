@@ -19,6 +19,7 @@ import com.jaspreet.gfeattendancemanager.util.KioskLogger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 class StaffActionDialog : DialogFragment() {
 
@@ -156,8 +157,8 @@ class StaffActionDialog : DialogFragment() {
     private fun resetInactivityTimer() {
         inactivityJob?.cancel()
         inactivityJob = lifecycleScope.launch {
-            delay(10000L)
-            if (isAdded) {
+            delay(10.seconds)
+            if (isAdded && _binding != null) {
                 KioskLogger.sys("StaffActionDialog: Inactivity timeout, auto-dismissing")
                 dismiss()
             }
@@ -167,6 +168,7 @@ class StaffActionDialog : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         inactivityJob?.cancel()
+        inactivityJob = null
         KioskLogger.sys("StaffActionDialog dismissed for $staffName ($staffId)")
         viewModel.resumePolling()
     }
@@ -174,6 +176,7 @@ class StaffActionDialog : DialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         inactivityJob?.cancel()
+        inactivityJob = null
         _binding = null
     }
 }

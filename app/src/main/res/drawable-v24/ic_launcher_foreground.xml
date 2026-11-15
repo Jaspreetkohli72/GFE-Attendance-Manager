@@ -10,42 +10,42 @@
     <!-- Letter G (white bold path) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M42,19 H46 C47.7,19 48,19.3 48,21 V22 H45.5 V20.8 H41.5 V26.2 H45.5 V24.5 H43.5 V22.8 H48 V26 C48,27.7 47.7,28 46,28 H42 C40.3,28 40,27.7 40,26 V21 C40,19.3 40.3,19 42,19 Z" />
+        android:pathData="M45,20 H48 V21.6 H45.2 V24.4 H46.4 V23.2 H45.2 V21.8 H48 V24.8 C48,25.7 47.5,26 46.5,26 H45 C43.5,26 43,25.5 43,24 V22 C43,20.5 43.5,20 45,20 Z" />
 
     <!-- Letter F (white bold path) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M51,19 H58 V20.8 H53.2 V22.6 H57 V24.3 H53.2 V28 H51 V19 Z" />
+        android:pathData="M51,20 H56 V21.6 H52.8 V22.6 H55.2 V23.8 H52.8 V26 H51 V20 Z" />
 
     <!-- Letter E (white bold path) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M61,19 H68 V20.8 H63.2 V22.6 H67 V24.3 H63.2 V26.2 H68 V28 H61 V19 Z" />
+        android:pathData="M59,20 H64 V21.6 H60.8 V22.6 H63.2 V23.8 H60.8 V24.4 H64 V26 H59 V20 Z" />
 
     <!-- 2. TOP SUBTITLE TEXT: ATTENDANCE -->
     <path
         android:fillColor="#E0E6ED"
-        android:pathData="M27.75,31 L26,35 H27.1 L27.5,34 H29 L29.4,35 H30.5 L28.75,31 H27.75 Z M27.8,33.1 L28.25,32 L28.7,33.1 H27.8 Z M32,31 H35.5 V31.9 H34.3 V35 H33.2 V31.9 H32 V31 Z M38,31 H41.5 V31.9 H40.3 V35 H39.2 V31.9 H38 V31 Z M44,31 H47.5 V31.9 H45.1 V32.55 H47 V33.45 H45.1 V34.1 H47.5 V35 H44 V31 Z M50,31 H51.1 L52.9,33.6 V31 H54 V35 H52.9 L51.1,32.4 V35 H50 V31 Z M56.5,31 H59 C60.1,31 60.5,31.5 60.5,33 C60.5,34.5 60.1,35 59,35 H56.5 V31 Z M57.6,31.9 V34.1 H58.8 C59.3,34.1 59.4,33.8 59.4,33 C59.4,32.2 59.3,31.9 58.8,31.9 H57.6 Z M64.75,31 L63,35 H64.1 L64.5,34 H66 L66.4,35 H67.5 L65.75,31 H64.75 Z M64.8,33.1 L65.25,32 L65.7,33.1 H64.8 Z M69,31 H70.1 L71.9,33.6 V31 H73 V35 H71.9 L70.1,32.4 V35 H69 V31 Z M77,31 H79 V31.9 H77.1 C76.6,31.9 76.5,32.2 76.5,33 C76.5,33.8 76.6,34.1 77.1,34.1 H79 V35 H77 C75.8,35 75.4,34.5 75.4,33 C75.4,31.5 75.8,31 77,31 Z M81.5,31 H85 V31.9 H82.6 V32.55 H84.5 V33.45 H82.6 V34.1 H85 V35 H81.5 V31 Z" />
+        android:pathData="M33.3,28.5 L32,32.5 H32.8 L33.1,31.5 H34.2 L34.5,32.5 H35.3 L34,28.5 H33.3 Z M33.3,30.6 L33.6,29.5 L34,30.6 H33.3 Z M36.5,28.5 H39.1 V29.4 H38.2 V32.5 H37.4 V29.4 H36.5 V28.5 Z M41,28.5 H43.6 V29.4 H42.7 V32.5 H41.9 V29.4 H41 V28.5 Z M45.5,28.5 H48 V29.4 H46.3 V30 H47.7 V30.8 H46.3 V31.5 H48 V32.5 H45.5 V28.5 Z M50,28.5 H50.8 L52.2,31.1 V28.5 H53 V32.5 H52.2 L50.8,29.9 V32.5 H50 V28.5 Z M55,28.5 H56.9 C57.7,28.5 58,28.9 58,30 C58,31.1 57.7,32.5 56.9,32.5 H55 V28.5 Z M55.8,29.2 V31.8 H56.7 C57.1,31.8 57.2,31.5 57.2,30.5 C57.2,29.5 57.1,29.2 56.7,29.2 H55.8 Z M61.1,28.5 L59.8,32.5 H60.6 L60.9,31.5 H62 L62.3,32.5 H63.1 L61.8,28.5 H61.1 Z M61.1,30.6 L61.4,29.5 L61.8,30.6 H61.1 Z M64.3,28.5 H65.1 L66.5,31.1 V28.5 H67.3 V32.5 H66.5 L65.1,29.9 V32.5 H64.3 V28.5 Z M70.3,28.5 H71.8 V29.4 H70.4 C70,29.4 69.9,29.6 69.9,30.5 C69.9,31.4 70,31.6 70.4,31.6 H71.8 V32.5 H70.3 C69.4,32.5 69.1,32.1 69.1,30.5 C69.1,28.9 69.4,28.5 70.3,28.5 Z M73.3,28.5 H75.8 V29.4 H74.1 V30 H75.5 V30.8 H74.1 V31.5 H75.8 V32.5 H73.3 V28.5 Z" />
 
     <!-- 3. CENTER CALENDAR ICON -->
     <!-- Calendar Ambient Shadow -->
     <path
         android:fillColor="#0A000000"
-        android:pathData="M36,44 H72 C75.3,44 78,46.7 78,50 V78 C78,81.3 75.3,84 72,84 H36 C32.7,84 30,81.3 30,78 V50 C30,46.7 32.7,44 36,44 Z" />
+        android:pathData="M38,41 H70 C73.3,41 76,43.7 76,47 V73 C76,76.3 73.3,79 70,79 H38 C34.7,79 32,76.3 32,73 V47 C32,43.7 34.7,41 38,41 Z" />
 
     <!-- Calendar Body Fill -->
     <path
         android:fillColor="#0D2142"
-        android:pathData="M36,42 H72 C75.3,42 78,44.7 78,48 V76 C78,79.3 75.3,82 72,82 H36 C32.7,82 30,79.3 30,76 V48 C30,44.7 32.7,42 36,42 Z" />
+        android:pathData="M38,39 H70 C73.3,39 76,41.7 76,45 V71 C76,74.3 73.3,77 70,77 H38 C34.7,77 32,74.3 32,71 V45 C32,41.7 34.7,39 38,39 Z" />
 
     <!-- Calendar Top Header Bar (Cyan-Emerald Gradient Fill) -->
-    <path android:pathData="M36,42 H72 C75.3,42 78,44.7 78,48 V52 H30 V48 C30,44.7 32.7,42 36,42 Z">
+    <path android:pathData="M38,39 H70 C73.3,39 76,41.7 76,45 V49 H32 V45 C32,41.7 34.7,39 38,39 Z">
         <aapt:attr name="android:fillColor">
             <gradient
-                android:startX="30"
-                android:startY="42"
-                android:endX="78"
-                android:endY="52"
+                android:startX="32"
+                android:startY="39"
+                android:endX="76"
+                android:endY="49"
                 android:type="linear">
                 <item android:color="#00E5FF" android:offset="0.0" />
                 <item android:color="#10B981" android:offset="1.0" />
@@ -55,14 +55,14 @@
 
     <!-- Calendar Card Outer Border (Cyan-Emerald Gradient Stroke) -->
     <path
-        android:pathData="M36,42 H72 C75.3,42 78,44.7 78,48 V76 C78,79.3 75.3,82 72,82 H36 C32.7,82 30,79.3 30,76 V48 C30,44.7 32.7,42 36,42 Z"
+        android:pathData="M38,39 H70 C73.3,39 76,41.7 76,45 V71 C76,74.3 73.3,77 70,77 H38 C34.7,77 32,74.3 32,71 V45 C32,41.7 34.7,39 38,39 Z"
         android:strokeWidth="1.8">
         <aapt:attr name="android:strokeColor">
             <gradient
-                android:startX="30"
-                android:startY="42"
-                android:endX="78"
-                android:endY="82"
+                android:startX="32"
+                android:startY="39"
+                android:endX="76"
+                android:endY="77"
                 android:type="linear">
                 <item android:color="#00E5FF" android:offset="0.0" />
                 <item android:color="#10B981" android:offset="1.0" />
@@ -71,56 +71,56 @@
     </path>
 
     <!-- Binder Loops / Rings at top of Calendar -->
-    <!-- Loop 1 (x=38) -->
+    <!-- Loop 1 (x=40) -->
     <path
         android:fillColor="#E0F7FA"
-        android:pathData="M38,38 C39.1,38 40,38.9 40,40 V44 C40,45.1 39.1,46 38,46 C36.9,46 36,45.1 36,44 V40 C36,38.9 36.9,38 38,38 Z" />
+        android:pathData="M40,35 C41.1,35 42,35.9 42,37 V41 C42,42.1 41.1,43 40,43 C38.9,43 38,42.1 38,41 V37 C38,35.9 38.9,35 40,35 Z" />
     <path
         android:fillColor="#0A1428"
-        android:pathData="M38,40 C38.5,40 38.8,40.4 38.8,41 V43 C38.8,43.6 38.5,44 38,44 C37.5,44 37.2,43.6 37.2,43 V41 C37.2,40.4 37.5,40 38,40 Z" />
+        android:pathData="M40,37 C40.5,37 40.8,37.4 40.8,38 V40 C40.8,40.6 40.5,41 40,41 C39.5,41 39.2,40.6 39.2,40 V38 C39.2,37.4 39.5,37 40,37 Z" />
 
-    <!-- Loop 2 (x=48) -->
+    <!-- Loop 2 (x=49) -->
     <path
         android:fillColor="#E0F7FA"
-        android:pathData="M48,38 C49.1,38 50,38.9 50,40 V44 C50,45.1 49.1,46 48,46 C46.9,46 46,45.1 46,44 V40 C46,38.9 46.9,38 48,38 Z" />
+        android:pathData="M49,35 C50.1,35 51,35.9 51,37 V41 C51,42.1 50.1,43 49,43 C47.9,43 47,42.1 47,41 V37 C47,35.9 47.9,35 49,35 Z" />
     <path
         android:fillColor="#0A1428"
-        android:pathData="M48,40 C48.5,40 48.8,40.4 48.8,41 V43 C48.8,43.6 48.5,44 48,44 C47.5,44 47.2,43.6 47.2,43 V41 C47.2,40.4 47.5,40 48,40 Z" />
+        android:pathData="M49,37 C49.5,37 49.8,37.4 49.8,38 V40 C49.8,40.6 49.5,41 49,41 C48.5,41 48.2,40.6 48.2,40 V38 C48.2,37.4 48.5,37 49,37 Z" />
 
-    <!-- Loop 3 (x=60) -->
+    <!-- Loop 3 (x=59) -->
     <path
         android:fillColor="#E0F7FA"
-        android:pathData="M60,38 C61.1,38 62,38.9 62,40 V44 C62,45.1 61.1,46 60,46 C58.9,46 58,45.1 58,44 V40 C58,38.9 58.9,38 60,38 Z" />
+        android:pathData="M59,35 C60.1,35 61,35.9 61,37 V41 C61,42.1 60.1,43 59,43 C57.9,43 57,42.1 57,41 V37 C57,35.9 57.9,35 59,35 Z" />
     <path
         android:fillColor="#0A1428"
-        android:pathData="M60,40 C60.5,40 60.8,40.4 60.8,41 V43 C60.8,43.6 60.5,44 60,44 C59.5,44 59.2,43.6 59.2,43 V41 C59.2,40.4 59.5,40 60,40 Z" />
+        android:pathData="M59,37 C59.5,37 59.8,37.4 59.8,38 V40 C59.8,40.6 59.5,41 59,41 C58.5,41 58.2,40.6 58.2,40 V38 C58.2,37.4 58.5,37 59,37 Z" />
 
-    <!-- Loop 4 (x=70) -->
+    <!-- Loop 4 (x=68) -->
     <path
         android:fillColor="#E0F7FA"
-        android:pathData="M70,38 C71.1,38 72,38.9 72,40 V44 C72,45.1 71.1,46 70,46 C68.9,46 68,45.1 68,44 V40 C68,38.9 68.9,38 70,38 Z" />
+        android:pathData="M68,35 C69.1,35 70,35.9 70,37 V41 C70,42.1 69.1,43 68,43 C66.9,43 66,42.1 66,41 V37 C66,35.9 66.9,35 68,35 Z" />
     <path
         android:fillColor="#0A1428"
-        android:pathData="M70,40 C70.5,40 70.8,40.4 70.8,41 V43 C70.8,43.6 70.5,44 70,44 C69.5,44 69.2,43.6 69.2,43 V41 C69.2,40.4 69.5,40 70,40 Z" />
+        android:pathData="M68,37 C68.5,37 68.8,37.4 68.8,38 V40 C68.8,40.6 68.5,41 68,41 C67.5,41 67.2,40.6 67.2,40 V38 C67.2,37.4 67.5,37 68,37 Z" />
 
     <!-- Calendar Grid Accent Dots -->
     <path
         android:fillColor="#3300E5FF"
-        android:pathData="M38,57 A1,1 0 1,0 38,59 A1,1 0 1,0 38,57 Z M46,57 A1,1 0 1,0 46,59 A1,1 0 1,0 46,57 Z M54,57 A1,1 0 1,0 54,59 A1,1 0 1,0 54,57 Z M62,57 A1,1 0 1,0 62,59 A1,1 0 1,0 62,57 Z M70,57 A1,1 0 1,0 70,59 A1,1 0 1,0 70,57 Z M38,65 A1,1 0 1,0 38,67 A1,1 0 1,0 38,65 Z M46,65 A1,1 0 1,0 46,67 A1,1 0 1,0 46,65 Z M38,73 A1,1 0 1,0 38,75 A1,1 0 1,0 38,73 Z M46,73 A1,1 0 1,0 46,75 A1,1 0 1,0 46,73 Z M54,73 A1,1 0 1,0 54,75 A1,1 0 1,0 54,73 Z" />
+        android:pathData="M38,53 A0.8,0.8 0 1,0 38,54.6 A0.8,0.8 0 1,0 38,53 Z M45,53 A0.8,0.8 0 1,0 45,54.6 A0.8,0.8 0 1,0 45,53 Z M52,53 A0.8,0.8 0 1,0 52,54.6 A0.8,0.8 0 1,0 52,53 Z M59,53 A0.8,0.8 0 1,0 59,54.6 A0.8,0.8 0 1,0 59,53 Z M66,53 A0.8,0.8 0 1,0 66,54.6 A0.8,0.8 0 1,0 66,53 Z M38,60 A0.8,0.8 0 1,0 38,61.6 A0.8,0.8 0 1,0 38,60 Z M45,60 A0.8,0.8 0 1,0 45,61.6 A0.8,0.8 0 1,0 45,60 Z M38,67 A0.8,0.8 0 1,0 38,68.6 A0.8,0.8 0 1,0 38,67 Z M45,67 A0.8,0.8 0 1,0 45,68.6 A0.8,0.8 0 1,0 45,67 Z M52,67 A0.8,0.8 0 1,0 52,68.6 A0.8,0.8 0 1,0 52,67 Z" />
 
     <!-- 4. LARGE THICK CHECKMARK INSIDE CALENDAR -->
     <!-- Checkmark Glow Underlay -->
     <path
-        android:pathData="M40,61 L49,70 L67,51"
-        android:strokeWidth="9"
+        android:pathData="M40,57 L47,65 L64,48"
+        android:strokeWidth="7.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round">
         <aapt:attr name="android:strokeColor">
             <gradient
                 android:startX="40"
-                android:startY="61"
-                android:endX="67"
-                android:endY="51"
+                android:startY="57"
+                android:endX="64"
+                android:endY="48"
                 android:type="linear">
                 <item android:color="#3300E5FF" android:offset="0.0" />
                 <item android:color="#3310B981" android:offset="1.0" />
@@ -130,16 +130,16 @@
 
     <!-- Main Thick Gradient Checkmark -->
     <path
-        android:pathData="M40,61 L49,70 L67,51"
-        android:strokeWidth="5.5"
+        android:pathData="M40,57 L47,65 L64,48"
+        android:strokeWidth="4.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round">
         <aapt:attr name="android:strokeColor">
             <gradient
                 android:startX="40"
-                android:startY="61"
-                android:endX="67"
-                android:endY="51"
+                android:startY="57"
+                android:endX="64"
+                android:endY="48"
                 android:type="linear">
                 <item android:color="#00E5FF" android:offset="0.0" />
                 <item android:color="#10B981" android:offset="1.0" />
@@ -151,64 +151,59 @@
     <!-- Outer Cutout Circle -->
     <path
         android:fillColor="#0A1428"
-        android:pathData="M72,61 C79.18,61 85,66.82 85,74 C85,81.18 79.18,87 72,87 C64.82,87 59,81.18 59,74 C59,66.82 64.82,61 72,61 Z" />
+        android:pathData="M67,58 C72.52,58 77,62.48 77,68 C77,73.52 72.52,78 67,78 C61.48,78 57,73.52 57,68 C57,62.48 61.48,58 67,58 Z" />
 
     <!-- Clock Inner Face -->
     <path
         android:fillColor="#0D2545"
-        android:pathData="M72,63 C78.08,63 83,67.92 83,74 C83,80.08 78.08,85 72,85 C65.92,85 61,80.08 61,74 C61,67.92 65.92,63 72,63 Z" />
+        android:pathData="M67,59.5 C71.7,59.5 75.5,63.3 75.5,68 C75.5,72.7 71.7,76.5 67,76.5 C62.3,76.5 58.5,72.7 58.5,68 C58.5,63.3 62.3,59.5 67,59.5 Z" />
 
     <!-- Clock Border Circle (Emerald #10B981) -->
     <path
-        android:pathData="M72,63 C78.08,63 83,67.92 83,74 C83,80.08 78.08,85 72,85 C65.92,85 61,80.08 61,74 C61,67.92 65.92,63 72,63 Z"
-        android:strokeWidth="1.8"
+        android:pathData="M67,59.5 C71.7,59.5 75.5,63.3 75.5,68 C75.5,72.7 71.7,76.5 67,76.5 C62.3,76.5 58.5,72.7 58.5,68 C58.5,63.3 62.3,59.5 67,59.5 Z"
+        android:strokeWidth="1.5"
         android:strokeColor="#10B981" />
 
     <!-- Clock Hour Ticks -->
     <path
         android:fillColor="#10B981"
-        android:pathData="M72,65 A1,1 0 1,0 72,67 A1,1 0 1,0 72,65 Z M80,73 A1,1 0 1,0 80,75 A1,1 0 1,0 80,73 Z M72,81 A1,1 0 1,0 72,83 A1,1 0 1,0 72,81 Z M64,73 A1,1 0 1,0 64,75 A1,1 0 1,0 64,73 Z" />
+        android:pathData="M67,61 A0.8,0.8 0 1,0 67,62.6 A0.8,0.8 0 1,0 67,61 Z M73,67 A0.8,0.8 0 1,0 73,68.6 A0.8,0.8 0 1,0 73,67 Z M67,73 A0.8,0.8 0 1,0 67,74.6 A0.8,0.8 0 1,0 67,73 Z M61,67 A0.8,0.8 0 1,0 61,68.6 A0.8,0.8 0 1,0 61,67 Z" />
 
-    <!-- Clock Hands (#10B981 / #00E5FF) -->
+    <!-- Clock Hands -->
     <!-- Hour Hand -->
     <path
-        android:pathData="M72,74 L68.5,70.5"
-        android:strokeWidth="2.0"
+        android:pathData="M67,68 L64,65"
+        android:strokeWidth="1.8"
         android:strokeColor="#10B981"
         android:strokeLineCap="round" />
 
     <!-- Minute Hand -->
     <path
-        android:pathData="M72,74 L76.5,69.5"
-        android:strokeWidth="1.8"
+        android:pathData="M67,68 L71,64"
+        android:strokeWidth="1.5"
         android:strokeColor="#00E5FF"
         android:strokeLineCap="round" />
 
     <!-- Center Pin -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M72,72.5 A1.5,1.5 0 1,0 72,75.5 A1.5,1.5 0 1,0 72,72.5 Z" />
+        android:pathData="M67,66.8 A1.2,1.2 0 1,0 67,69.2 A1.2,1.2 0 1,0 67,66.8 Z" />
 
     <!-- 6. SPARKLE STAR ACCENTS -->
-    <!-- Primary Sparkle at Top-Right of Calendar -->
+    <!-- Primary Sparkle at Top-Right -->
     <path
-        android:pathData="M81,28 C81,32 84,35 88,35 C84,35 81,38 81,42 C81,38 78,35 74,35 C78,35 81,32 81,28 Z">
+        android:pathData="M71,23 C71,25 72.5,26.5 74.5,26.5 C72.5,26.5 71,28 71,30 C71,28 69.5,26.5 67.5,26.5 C69.5,26.5 71,25 71,23 Z">
         <aapt:attr name="android:fillColor">
             <gradient
-                android:startX="74"
-                android:startY="28"
-                android:endX="88"
-                android:endY="42"
+                android:startX="67.5"
+                android:startY="23"
+                android:endX="74.5"
+                android:endY="30"
                 android:type="linear">
                 <item android:color="#FFFFFF" android:offset="0.0" />
                 <item android:color="#00E5FF" android:offset="1.0" />
             </gradient>
         </aapt:attr>
     </path>
-
-    <!-- Secondary Small Sparkle Accent at Top-Left -->
-    <path
-        android:fillColor="#8000E5FF"
-        android:pathData="M24,40 C24,42 25.5,43.5 27.5,43.5 C25.5,43.5 24,45 24,47 C24,45 22.5,43.5 20.5,43.5 C22.5,43.5 24,42 24,40 Z" />
 
 </vector>

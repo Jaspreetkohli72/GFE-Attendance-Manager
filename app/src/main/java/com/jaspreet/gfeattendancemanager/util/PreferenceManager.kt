@@ -11,7 +11,7 @@ class PreferenceManager(context: Context) {
 
     private val prefs: SharedPreferences = context.applicationContext.getSharedPreferences(
         PREF_NAME,
-        Context.MODE_PRIVATE
+        Context.MODE_PRIVATE,
     )
     private val gson = Gson()
 
@@ -19,28 +19,53 @@ class PreferenceManager(context: Context) {
         private const val PREF_NAME = "gfe_attendance_prefs"
         private const val KEY_BASE_URL = "key_base_url"
         private const val KEY_STAFF_CACHE = "key_staff_cache"
-        const val DEFAULT_BASE_URL = "https://galaxyerp.vercel.app"
+        const val DEFAULT_BASE_URL = "https://galaxyerp.vercel.app/"
     }
 
     fun getBaseUrl(): String {
-        val url = prefs.getString(KEY_BASE_URL, DEFAULT_BASE_URL) ?: DEFAULT_BASE_URL
+        val rawUrl = prefs.getString(KEY_BASE_URL, DEFAULT_BASE_URL) ?: DEFAULT_BASE_URL
+        var url = rawUrl.trim()
+        if (url.isBlank()) {
+            url = DEFAULT_BASE_URL
+        }
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://$url"
+        }
+        if (!url.endsWith("/")) {
+            url = "$url/"
+        }
         KioskLogger.sys("PreferenceManager: Read base URL ($url)")
         return url
     }
 
     fun setBaseUrl(url: String) {
-        prefs.edit { putString(KEY_BASE_URL, url) }
-        KioskLogger.sys("PreferenceManager: Base URL updated to $url")
+        var cleanUrl = url.trim()
+        if (cleanUrl.isBlank()) {
+            cleanUrl = DEFAULT_BASE_URL
+        }
+        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+            cleanUrl = "https://$cleanUrl"
+        }
+        if (!cleanUrl.endsWith("/")) {
+            cleanUrl = "$cleanUrl/"
+        }
+        prefs.edit { putString(KEY_BASE_URL, cleanUrl) }
+        KioskLogger.sys("PreferenceManager: Base URL updated to $cleanUrl")
     }
 
     fun saveStaffList(staffList: List<StaffMember>) {
-        val jsonString = gson.toJson(staffList)
-        prefs.edit { putString(KEY_STAFF_CACHE, jsonString) }
-        KioskLogger.sys("PreferenceManager: Saved ${staffList.size} staff members to cache")
+        try {
+            val jsonString = gson.toJson(staffList)
+            prefs.edit { putString(KEY_STAFF_CACHE, jsonString) }
+            KioskLogger.sys("PreferenceManager: Saved ${staffList.size} staff members to cache")
+        } catch (e: Exception) {
+            KioskLogger.error("PreferenceManager: Failed to save staff list to cache", e)
+        }
     }
 
     fun getStaffList(): List<StaffMember> {
-        val jsonString = prefs.getString(KEY_STAFF_CACHE, null) ?: return emptyList()
+        val jsonString = prefs.getString(KEY_STAFF_CACHE, null)
+        if (jsonString.isNullOrBlank()) return emptyList()
         return try {
             val type = object : TypeToken<List<StaffMember>>() {}.type
             val list = gson.fromJson<List<StaffMember>>(jsonString, type) ?: emptyList()
@@ -51,4 +76,7 @@ class PreferenceManager(context: Context) {
             emptyList()
         }
     }
+
+    @Suppress("unused")
+    fun getCachedStaffList(): List<StaffMember> = getStaffList()
 }

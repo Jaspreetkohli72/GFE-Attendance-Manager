@@ -88,28 +88,10 @@ object ApiClient {
             .build()
     }
 
+    @Synchronized
     fun getService(baseUrl: String): KioskApiService {
         val formattedUrl = formatBaseUrl(baseUrl)
         if (apiService == null || currentBaseUrl != formattedUrl) {
-            synchronized(this) {
-                if (apiService == null || currentBaseUrl != formattedUrl) {
-                    currentBaseUrl = formattedUrl
-                    val newRetrofit = Retrofit.Builder()
-                        .baseUrl(formattedUrl)
-                        .client(okHttpClient)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build()
-                    retrofit = newRetrofit
-                    apiService = newRetrofit.create(KioskApiService::class.java)
-                }
-            }
-        }
-        return apiService!!
-    }
-
-    fun updateBaseUrl(baseUrl: String) {
-        val formattedUrl = formatBaseUrl(baseUrl)
-        synchronized(this) {
             currentBaseUrl = formattedUrl
             val newRetrofit = Retrofit.Builder()
                 .baseUrl(formattedUrl)
@@ -119,6 +101,20 @@ object ApiClient {
             retrofit = newRetrofit
             apiService = newRetrofit.create(KioskApiService::class.java)
         }
+        return apiService!!
+    }
+
+    @Synchronized
+    fun updateBaseUrl(baseUrl: String) {
+        val formattedUrl = formatBaseUrl(baseUrl)
+        currentBaseUrl = formattedUrl
+        val newRetrofit = Retrofit.Builder()
+            .baseUrl(formattedUrl)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        retrofit = newRetrofit
+        apiService = newRetrofit.create(KioskApiService::class.java)
     }
 
     private fun formatBaseUrl(baseUrl: String): String {

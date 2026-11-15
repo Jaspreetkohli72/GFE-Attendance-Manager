@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.seconds
 
 data class BannerEvent(
     val message: String,
@@ -68,11 +69,11 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         isPollingPaused = false
         KioskLogger.sys("Background polling started")
         pollingJob = viewModelScope.launch {
-            while (isActive) {
+            while (coroutineContext.isActive) {
                 if (!isPollingPaused) {
                     fetchStaff()
                 }
-                delay(30000L)
+                delay(30.seconds)
             }
         }
     }
@@ -144,10 +145,14 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadCachedStaff() {
-        val cached = preferenceManager.getStaffList()
-        if (cached.isNotEmpty()) {
-            _staffList.value = cached
-            KioskLogger.sys("Loaded ${cached.size} cached staff members")
+        try {
+            val cached = preferenceManager.getStaffList()
+            if (cached.isNotEmpty()) {
+                _staffList.value = cached
+                KioskLogger.sys("Loaded ${cached.size} cached staff members")
+            }
+        } catch (t: Throwable) {
+            KioskLogger.error("Failed to load cached staff", t)
         }
     }
 
@@ -158,12 +163,12 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         val currentList = _staffList.value
         val staffMember = currentList.find { it.id == staffId }
-        val staffName = staffMember?.name ?: staffId
+        val staffName = staffMember?.name?.takeIf { it.isNotBlank() } ?: staffId.ifBlank { "Staff" }
         val isClockIn = action.equals("IN", ignoreCase = true)
         val actionText = if (isClockIn) "IN" else "OUT"
         val currentTimeString = SimpleDateFormat("hh:mm a", Locale.US).format(Date())
 
-        // 1. Immediately (0ms) optimistic local update
+        // 1. Immediately (0ms) optimistic local update handling null/empty fields safely
         val updatedList = currentList.map { member ->
             if (member.id == staffId) {
                 val updatedSince = if (isClockIn) {
@@ -188,9 +193,17 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         val bannerMsg = "$staffName — Clocked ${if (isClockIn) "IN!" else "OUT!"}"
         KioskLogger.user("[PUNCH OPTIMISTIC] $staffName — Clocked $actionText (0ms feedback)")
         viewModelScope.launch {
-            _bannerEvent.emit(BannerEvent(bannerMsg, true))
+            try {
+                _bannerEvent.emit(BannerEvent(bannerMsg, true))
+            } catch (t: Throwable) {
+                KioskLogger.error("Failed to emit punch banner event", t)
+            }
         }
-        onResult?.invoke(true, bannerMsg, updatedList)
+        try {
+            onResult?.invoke(true, bannerMsg, updatedList)
+        } catch (t: Throwable) {
+            KioskLogger.error("Error in punch onResult callback", t)
+        }
 
         // 2. Background Network Sync (Dispatchers.IO)
         viewModelScope.launch(Dispatchers.IO) {
@@ -227,7 +240,9 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                 KioskLogger.error("Punch network exception for $staffName: $errorMsg", t)
                 _isOffline.value = true
                 fetchStaff()
-                _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
+                try {
+                    _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
+                } catch (_: Exception) {}
             }
         }
     }
@@ -238,16 +253,24 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         notes: String = "Sandeep",
         onResult: ((isSuccess: Boolean, message: String) -> Unit)? = null
     ) {
-        val staffName = _staffList.value.find { it.id == staffId }?.name ?: staffId
+        val staffName = _staffList.value.find { it.id == staffId }?.name?.takeIf { it.isNotBlank() } ?: staffId.ifBlank { "Staff" }
         val amountStr = if (amount % 1.0 == 0.0) amount.toInt().toString() else amount.toString()
         val bannerMsg = "₹$amountStr Advance recorded for $staffName"
 
         // 1. Immediately (0ms) emit success banner event & play chime
         KioskLogger.user("[ADVANCE OPTIMISTIC] ₹$amountStr Given By $notes to $staffName (0ms feedback)")
         viewModelScope.launch {
-            _bannerEvent.emit(BannerEvent(bannerMsg, true))
+            try {
+                _bannerEvent.emit(BannerEvent(bannerMsg, true))
+            } catch (t: Throwable) {
+                KioskLogger.error("Failed to emit advance banner event", t)
+            }
         }
-        onResult?.invoke(true, bannerMsg)
+        try {
+            onResult?.invoke(true, bannerMsg)
+        } catch (t: Throwable) {
+            KioskLogger.error("Error in addAdvance onResult callback", t)
+        }
 
         // 2. Background Network Sync (Dispatchers.IO)
         viewModelScope.launch(Dispatchers.IO) {
@@ -280,12 +303,15 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                 KioskLogger.error("Advance network exception for $staffName: $errorMsg", t)
                 _isOffline.value = true
                 fetchStaff()
-                _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
+                try {
+                    _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
+                } catch (_: Exception) {}
             }
         }
     }
 
     override fun onCleared() {
         pollingJob?.cancel()
+        pollingJob = null
     }
 }

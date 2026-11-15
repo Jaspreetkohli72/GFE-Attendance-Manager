@@ -70,7 +70,7 @@ class AdminSettingsDialog : DialogFragment() {
         binding.layoutAdminControls.visibility = View.GONE
 
         binding.btnSubmitPin.setOnClickListener {
-            val enteredPin = binding.etPin.text.toString().trim()
+            val enteredPin = binding.etPin.text?.toString()?.trim() ?: ""
             KioskLogger.user("[USER ACTION] AdminSettingsDialog: Submitted PIN")
             if (enteredPin == ADMIN_PIN) {
                 KioskLogger.user("[USER ACTION] AdminSettingsDialog: Correct PIN submitted")
@@ -94,8 +94,14 @@ class AdminSettingsDialog : DialogFragment() {
 
     private fun setupAdminControls() {
         binding.btnSaveUrl.setOnClickListener {
-            val newUrl = binding.etServerUrl.text.toString().trim()
+            var newUrl = binding.etServerUrl.text?.toString()?.trim() ?: ""
             if (newUrl.isNotBlank()) {
+                if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
+                    newUrl = "https://$newUrl"
+                }
+                if (!newUrl.endsWith("/")) {
+                    newUrl = "$newUrl/"
+                }
                 preferenceManager.setBaseUrl(newUrl)
                 ApiClient.updateBaseUrl(newUrl)
                 viewModel.fetchStaff()

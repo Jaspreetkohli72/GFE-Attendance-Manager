@@ -108,18 +108,18 @@ class AdvanceDialog : DialogFragment() {
             val amountText = binding.etAmount.text?.toString()?.trim() ?: ""
             val amount = amountText.toDoubleOrNull()
 
+            if (amount == null || amount <= 0.0) {
+                KioskLogger.warn("AdvanceDialog: Invalid amount entered ($amountText)")
+                Toast.makeText(requireContext(), getString(R.string.please_enter_valid_amount), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val checkedId = binding.rgGivenBy.checkedRadioButtonId
             val selectedRadioButton = if (checkedId != View.NO_ID) {
                 binding.rgGivenBy.findViewById<RadioButton>(checkedId)
             } else null
             val selectedGivenBy = selectedRadioButton?.text?.toString()?.trim()
             val notes = if (!selectedGivenBy.isNullOrBlank()) selectedGivenBy else "Sandeep"
-
-            if (amount == null || amount <= 0) {
-                KioskLogger.warn("AdvanceDialog: Invalid amount entered ($amountText)")
-                Toast.makeText(requireContext(), getString(R.string.please_enter_valid_amount), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
 
             KioskLogger.user("[USER ACTION] AdvanceDialog: Confirmed Advance ₹$amountText for $staffName (Given by $notes)")
             viewModel.addAdvance(staffId, amount, notes)

@@ -12,6 +12,7 @@ class SoundManager {
             toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
         } catch (e: Exception) {
             KioskLogger.error("Failed to initialize ToneGenerator", e)
+            toneGenerator = null
         }
     }
 
@@ -34,9 +35,10 @@ class SoundManager {
     fun release() {
         try {
             toneGenerator?.release()
-            toneGenerator = null
         } catch (e: Exception) {
             KioskLogger.error("Failed to release ToneGenerator", e)
+        } finally {
+            toneGenerator = null
         }
     }
 }
