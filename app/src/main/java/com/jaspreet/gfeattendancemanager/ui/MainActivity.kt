@@ -121,8 +121,7 @@ class MainActivity : AppCompatActivity() {
                              status == BatteryManager.BATTERY_STATUS_FULL ||
                              isPlugged
 
-            val text = if (isCharging) "⚡ $pct%" else "$pct%"
-            binding.tvBattery.text = text
+            binding.tvBattery.text = "$pct%"
 
             val iconRes = when {
                 isCharging -> R.drawable.ic_battery_charging
