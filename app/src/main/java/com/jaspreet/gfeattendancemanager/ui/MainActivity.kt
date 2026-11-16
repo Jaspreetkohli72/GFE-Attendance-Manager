@@ -1,5 +1,10 @@
 package com.jaspreet.gfeattendancemanager.ui
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -18,8 +23,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.jaspreet.gfeattendancemanager.R
 import com.jaspreet.gfeattendancemanager.databinding.ActivityMainBinding
 import com.jaspreet.gfeattendancemanager.ui.adapter.StaffButtonAdapter
-import com.jaspreet.gfeattendancemanager.ui.dialog.AdminSettingsDialog
+import com.jaspreet.gfeattendancemanager.ui.dialog.AdminPinDialog
 import com.jaspreet.gfeattendancemanager.ui.dialog.StaffActionDialog
+import com.jaspreet.gfeattendancemanager.ui.dialog.SyncLogDialog
 import com.jaspreet.gfeattendancemanager.ui.viewmodel.KioskViewModel
 import com.jaspreet.gfeattendancemanager.util.KioskLogger
 import com.jaspreet.gfeattendancemanager.util.SoundManager
@@ -43,6 +49,12 @@ class MainActivity : AppCompatActivity() {
     private var clockJob: Job? = null
     private var bannerHideJob: Job? = null
 
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            updateBatteryStatus()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         KioskLogger.sys("WORKSHOP KIOSK APPLICATION STARTED SUCCESSFULLY")
@@ -65,6 +77,64 @@ class MainActivity : AppCompatActivity() {
         setupClickListeners()
         observeViewModel()
         startClock()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        try {
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_BATTERY_CHANGED)
+                addAction(Intent.ACTION_POWER_CONNECTED)
+                addAction(Intent.ACTION_POWER_DISCONNECTED)
+            }
+            registerReceiver(batteryReceiver, filter)
+            updateBatteryStatus()
+        } catch (e: Exception) {
+            KioskLogger.error("Failed to register battery receiver", e)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(batteryReceiver)
+        } catch (_: Exception) {}
+    }
+
+    private fun updateBatteryStatus() {
+        try {
+            val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+            val intent = registerReceiver(null, filter) ?: return
+
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            val pct = if (level >= 0 && scale > 0) (level * 100) / scale else 100
+            val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+            val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+
+            val isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC ||
+                            plugged == BatteryManager.BATTERY_PLUGGED_USB ||
+                            plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS ||
+                            plugged > 0
+
+            val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                             status == BatteryManager.BATTERY_STATUS_FULL ||
+                             isPlugged
+
+            val text = if (isCharging) "⚡ $pct%" else "$pct%"
+            binding.tvBattery.text = text
+
+            val iconRes = when {
+                isCharging -> R.drawable.ic_battery_charging
+                pct >= 90 -> R.drawable.ic_battery_full
+                pct >= 45 -> R.drawable.ic_battery_medium
+                pct >= 15 -> R.drawable.ic_battery_low
+                else -> R.drawable.ic_battery_critical
+            }
+            binding.ivBattery.setImageResource(iconRes)
+        } catch (e: Exception) {
+            KioskLogger.error("Failed to update battery status", e)
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -109,10 +179,16 @@ class MainActivity : AppCompatActivity() {
             viewModel.fetchStaff()
         }
 
-        binding.ibSettings.setOnClickListener {
-            KioskLogger.user("[USER ACTION] Admin settings opened")
-            val dialog = AdminSettingsDialog.newInstance()
-            dialog.show(supportFragmentManager, "AdminSettingsDialog")
+        binding.ibAdminShield.setOnClickListener {
+            KioskLogger.user("[USER ACTION] Admin Shield clicked -> Opening AdminPinDialog")
+            val dialog = AdminPinDialog.newInstance()
+            dialog.show(supportFragmentManager, "AdminPinDialog")
+        }
+
+        binding.tvSyncStatus.setOnClickListener {
+            KioskLogger.user("[USER ACTION] Sync Status clicked -> Opening SyncLogDialog")
+            val dialog = SyncLogDialog.newInstance()
+            dialog.show(supportFragmentManager, "SyncLogDialog")
         }
     }
 
@@ -122,6 +198,12 @@ class MainActivity : AppCompatActivity() {
                 launch {
                     viewModel.staffList.collect { list ->
                         staffAdapter.submitList(list)
+                    }
+                }
+                launch {
+                    viewModel.syncTrigger.collect {
+                        @Suppress("NotifyDataSetChanged")
+                        staffAdapter.notifyDataSetChanged()
                     }
                 }
                 launch {
@@ -158,9 +240,13 @@ class MainActivity : AppCompatActivity() {
         clockJob?.cancel()
         KioskLogger.sys("Digital clock loop started")
         clockJob = lifecycleScope.launch {
-            val dateFormat = SimpleDateFormat("hh:mm:ss a", Locale.US)
+            val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy", Locale.US)
+            val timeFormat = SimpleDateFormat("hh:mm:ss a", Locale.US)
             while (isActive) {
-                binding.tvClock.text = dateFormat.format(Date())
+                val now = Date()
+                binding.tvDate.text = dateFormat.format(now)
+                binding.tvClock.text = timeFormat.format(now)
+                updateBatteryStatus()
                 delay(1.seconds)
             }
         }

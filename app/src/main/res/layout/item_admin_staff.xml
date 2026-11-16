@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardAdminStaffButton"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/bg_card"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/bg_card_stroke"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- High-contrast worker name (22sp bold, text #F8FAFC) -->
+        <TextView
+            android:id="@+id/tvAdminStaffName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            tools:text="Gurpreet Singh" />
+
+        <!-- Role & Daily Wage (14sp bold cyan #38BDF8) -->
+        <TextView
+            android:id="@+id/tvAdminStaffRoleSalary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/color_clock"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="Senior Welder • ₹850/day" />
+
+        <!-- Pill-shaped status badge container -->
+        <TextView
+            android:id="@+id/tvAdminStaffStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_badge_clocked_in"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="6dp"
+            android:textColor="@color/color_clock_in_text"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="AVAILABLE" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

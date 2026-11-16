@@ -18,7 +18,8 @@ class PreferenceManager(context: Context) {
     companion object {
         private const val PREF_NAME = "gfe_attendance_prefs"
         private const val KEY_BASE_URL = "key_base_url"
-        private const val KEY_STAFF_CACHE = "key_staff_cache"
+        private const val PREF_CACHED_ACTIVE_STAFF = "key_active_staff_cache"
+        private const val PREF_CACHED_ALL_STAFF = "key_all_staff_cache"
         const val DEFAULT_BASE_URL = "https://galaxyerp.vercel.app/"
     }
 
@@ -53,30 +54,58 @@ class PreferenceManager(context: Context) {
         KioskLogger.sys("PreferenceManager: Base URL updated to $cleanUrl")
     }
 
-    fun saveStaffList(staffList: List<StaffMember>) {
+    // Active Staff (Main Kiosk Screen)
+    fun saveActiveStaffList(staffList: List<StaffMember>) {
         try {
             val jsonString = gson.toJson(staffList)
-            prefs.edit { putString(KEY_STAFF_CACHE, jsonString) }
-            KioskLogger.sys("PreferenceManager: Saved ${staffList.size} staff members to cache")
+            prefs.edit { putString(PREF_CACHED_ACTIVE_STAFF, jsonString) }
+            KioskLogger.sys("PreferenceManager: Saved ${staffList.size} active staff members to cache")
         } catch (e: Exception) {
-            KioskLogger.error("PreferenceManager: Failed to save staff list to cache", e)
+            KioskLogger.error("PreferenceManager: Failed to save active staff list to cache", e)
         }
     }
 
-    fun getStaffList(): List<StaffMember> {
-        val jsonString = prefs.getString(KEY_STAFF_CACHE, null)
+    fun getActiveStaffList(): List<StaffMember> {
+        val jsonString = prefs.getString(PREF_CACHED_ACTIVE_STAFF, null)
         if (jsonString.isNullOrBlank()) return emptyList()
         return try {
             val type = object : TypeToken<List<StaffMember>>() {}.type
             val list = gson.fromJson<List<StaffMember>>(jsonString, type) ?: emptyList()
-            KioskLogger.sys("PreferenceManager: Read ${list.size} staff members from cache")
+            KioskLogger.sys("PreferenceManager: Read ${list.size} active staff members from cache")
             list
         } catch (e: Exception) {
-            KioskLogger.error("PreferenceManager: Exception reading cached staff list", e)
+            KioskLogger.error("PreferenceManager: Exception reading cached active staff list", e)
             emptyList()
         }
     }
 
-    @Suppress("unused")
-    fun getCachedStaffList(): List<StaffMember> = getStaffList()
+    // All Staff (Admin Staff Management Screen)
+    fun saveAllStaffList(staffList: List<StaffMember>) {
+        try {
+            val jsonString = gson.toJson(staffList)
+            prefs.edit { putString(PREF_CACHED_ALL_STAFF, jsonString) }
+            KioskLogger.sys("PreferenceManager: Saved ${staffList.size} total staff members to admin cache")
+        } catch (e: Exception) {
+            KioskLogger.error("PreferenceManager: Failed to save all staff list to cache", e)
+        }
+    }
+
+    fun getAllStaffList(): List<StaffMember> {
+        val jsonString = prefs.getString(PREF_CACHED_ALL_STAFF, null)
+        if (jsonString.isNullOrBlank()) return emptyList()
+        return try {
+            val type = object : TypeToken<List<StaffMember>>() {}.type
+            val list = gson.fromJson<List<StaffMember>>(jsonString, type) ?: emptyList()
+            KioskLogger.sys("PreferenceManager: Read ${list.size} total staff members from admin cache")
+            list
+        } catch (e: Exception) {
+            KioskLogger.error("PreferenceManager: Exception reading cached all staff list", e)
+            emptyList()
+        }
+    }
+
+    // Backward compatibility aliases
+    fun saveStaffList(staffList: List<StaffMember>) = saveActiveStaffList(staffList)
+    fun getStaffList(): List<StaffMember> = getActiveStaffList()
+    fun getCachedStaffList(): List<StaffMember> = getActiveStaffList()
 }

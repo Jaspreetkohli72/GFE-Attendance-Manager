@@ -9,12 +9,27 @@
     <color name="color_clock_in_stroke">#10B981</color>
     <color name="color_clock_in_bg">#064E3B</color>
     <color name="color_clock_in_text">#34D399</color>
+
     <color name="color_clock_out_stroke">#475569</color>
     <color name="color_clock_out_bg">#1E293B</color>
     <color name="color_clock_out_text">#94A3B8</color>
     <color name="color_clock">#38BDF8</color>
     <color name="color_advance">#F59E0B</color>
     <color name="color_clock_out_btn">#EF4444</color>
+
+    <!-- Status Badges -->
+    <color name="color_terminated_bg">#7F1D1D</color>
+    <color name="color_terminated_stroke">#EF4444</color>
+    <color name="color_terminated_text">#FCA5A5</color>
+
+    <color name="color_on_leave_bg">#78350F</color>
+    <color name="color_on_leave_stroke">#F59E0B</color>
+    <color name="color_on_leave_text">#FDE68A</color>
+
+    <!-- Cyberpunk Terminal Colors -->
+    <color name="color_terminal_bg">#05050A</color>
+    <color name="color_terminal_green">#00FF66</color>
+    <color name="color_terminal_cyan">#38BDF8</color>
 
     <!-- Additional Slate Palette Tokens -->
     <color name="text_primary">#F8FAFC</color>

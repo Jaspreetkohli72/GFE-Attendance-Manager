@@ -8,88 +8,144 @@
     tools:context=".ui.MainActivity">
 
     <!-- Top Header Bar Container (64dp height) -->
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerContainer"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:background="@color/bg_card"
+        android:paddingHorizontal="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Left: Date & Digital Time -->
         <LinearLayout
-            android:id="@+id/headerBar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:id="@+id/layoutHeaderLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="20dp">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Workshop Title (20sp bold #F8FAFC) -->
             <TextView
-                android:id="@+id/tvWorkshopTitle"
+                android:id="@+id/tvDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/workshop_title"
-                android:textColor="@color/text_primary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="Mon, 16 Nov 2026" />
 
-            <!-- Digital Clock (20sp bold Cyan #38BDF8) -->
             <TextView
                 android:id="@+id/tvClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
+                android:layout_marginStart="12dp"
                 android:textColor="@color/color_clock"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 tools:text="10:45:12 AM" />
 
-            <!-- Spacer pushing right controls -->
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- Center: Mathematically Centered Workshop Title -->
+        <TextView
+            android:id="@+id/tvWorkshopTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/workshop_title"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Right: Sync Pill -> Battery -> Refresh -> Admin Shield -->
+        <LinearLayout
+            android:id="@+id/layoutHeaderRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <!-- Sync Status Badge Pill Container -->
             <TextView
                 android:id="@+id/tvSyncStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="12dp"
                 android:background="@drawable/bg_pill_synced"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="5dp"
                 android:textColor="@color/color_clock_in_text"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
                 tools:text="● Synced" />
+
+            <!-- Battery Indicator Container -->
+            <LinearLayout
+                android:id="@+id/layoutBattery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
+
+                <ImageView
+                    android:id="@+id/ivBattery"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_battery_full"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/tvBattery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="⚡ 76%" />
+
+            </LinearLayout>
 
             <!-- Refresh Circular Icon Button -->
             <ImageButton
                 android:id="@+id/ibRefresh"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:layout_marginEnd="8dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="6dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/cd_refresh"
-                android:padding="10dp"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_refresh"
                 app:tint="@color/color_clock_out_text" />
 
-            <!-- Settings Circular Icon Button -->
+            <!-- Admin Shield Icon Button (Replaces Gear Icon) -->
             <ImageButton
-                android:id="@+id/ibSettings"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:id="@+id/ibAdminShield"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/cd_settings"
-                android:padding="10dp"
+                android:contentDescription="@string/cd_admin_shield"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_settings"
-                app:tint="@color/color_clock_out_text" />
+                android:src="@drawable/ic_admin_shield"
+                app:tint="@color/accent_blue" />
 
         </LinearLayout>
 
@@ -97,10 +153,10 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_gravity="bottom"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:background="@color/bg_card_stroke" />
 
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Background Watermark Emblem -->
     <ImageView
@@ -139,7 +195,7 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Floating Confirmation Overlay Banner (Rounded Pill Banner, 12dp corner radius, 8dp elevation, 20sp bold text) -->
+    <!-- Floating Confirmation Overlay Banner -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cvConfirmationOverlay"
         android:layout_width="wrap_content"

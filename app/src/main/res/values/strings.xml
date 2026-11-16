@@ -3,16 +3,25 @@
     <string name="app_name">GFE Attendance Manager</string>
     <string name="workshop_title">GALAXY FABRICATION EXPERTS</string>
 
-    <!-- Main Activity -->
+    <!-- Main Activity Header & Controls -->
     <string name="cd_refresh">Refresh</string>
     <string name="cd_settings">Settings</string>
+    <string name="cd_admin_shield">Admin Staff Management</string>
     <string name="status_offline_cached">○ Offline (Cached)</string>
     <string name="status_synced">● Synced</string>
 
-    <!-- Staff Button Adapter -->
+    <!-- Staff Button Adapter Badges -->
     <string name="status_in_since">● IN %1$s</string>
     <string name="status_in">● IN</string>
     <string name="status_out">○ OUT</string>
+    <string name="badge_available">AVAILABLE</string>
+    <string name="badge_on_leave">ON LEAVE</string>
+    <string name="badge_terminated">TERMINATED</string>
+
+    <!-- Status choices -->
+    <string name="status_available">Available</string>
+    <string name="status_on_leave">On Leave</string>
+    <string name="status_terminated">Terminated</string>
 
     <!-- Advance Dialog -->
     <string name="record_cash_advance_title">Record Cash Advance for %1$s</string>
@@ -35,14 +44,18 @@
     <string name="cancel" tools:ignore="ButtonCasing">CANCEL</string>
     <string name="please_enter_valid_amount">Please enter a valid amount</string>
 
-    <!-- Admin Settings Dialog -->
+    <!-- Admin Security & Staff Roster -->
     <string name="admin_security_gate">Admin Security Gate</string>
-    <string name="enter_admin_pin">Enter Admin PIN to access settings</string>
+    <string name="enter_admin_pin">Enter Admin PIN to access staff management</string>
     <string name="hint_admin_pin">Admin PIN</string>
     <string name="incorrect_pin">Incorrect PIN. Try again.</string>
     <string name="submit_pin" tools:ignore="ButtonCasing">SUBMIT PIN</string>
+
     <string name="admin_settings">Admin Settings</string>
-    <string name="configure_server_url">Configure Server URL or system settings.</string>
+    <string name="admin_staff_management">Staff Roster &amp; Management</string>
+    <string name="add_new_staff" tools:ignore="ButtonCasing">+ ADD NEW STAFF</string>
+    <string name="edit_staff" tools:ignore="ButtonCasing">EDIT STAFF</string>
+    <string name="configure_server_url">Configure Server URL</string>
     <string name="hint_server_url">Server Base URL</string>
     <string name="save_url" tools:ignore="ButtonCasing">SAVE URL</string>
     <string name="exit_kiosk_system_settings" tools:ignore="ButtonCasing">EXIT KIOSK / OPEN SYSTEM SETTINGS</string>
@@ -52,6 +65,17 @@
     <string name="please_enter_valid_url">Please enter a valid URL</string>
     <string name="unable_to_open_system_settings">Unable to open system settings</string>
 
+    <!-- Staff Creation & Editing -->
+    <string name="create_staff_title">Add New Staff Member</string>
+    <string name="edit_staff_title">Edit Staff Member — %1$s</string>
+    <string name="hint_staff_name">Full Employee Name</string>
+    <string name="hint_staff_role">Role (Welder, Helper, Fitter, etc.)</string>
+    <string name="hint_daily_wage">Daily Wage (₹/day)</string>
+    <string name="hint_phone">Phone Number</string>
+    <string name="create_staff_button" tools:ignore="ButtonCasing">CREATE STAFF</string>
+    <string name="update_staff_button" tools:ignore="ButtonCasing">SAVE CHANGES</string>
+    <string name="status_label">Status:</string>
+
     <!-- Staff Action Dialog -->
     <string name="clocked_in_since">Clocked IN since %1$s</string>
     <string name="clocked_in">Clocked IN</string>
@@ -59,4 +83,8 @@
     <string name="clock_in" tools:ignore="ButtonCasing">CLOCK IN</string>
     <string name="clock_out" tools:ignore="ButtonCasing">CLOCK OUT</string>
     <string name="add_advance" tools:ignore="ButtonCasing">₹ ADD ADVANCE</string>
+
+    <!-- Terminal Log Modal -->
+    <string name="sync_log_title">Sync &amp; System Logs</string>
+    <string name="clear_logs" tools:ignore="ButtonCasing">CLEAR LOGS</string>
 </resources>

@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.jaspreet.gfeattendancemanager.data.api.ApiClient
 import com.jaspreet.gfeattendancemanager.data.model.AdvanceRequest
+import com.jaspreet.gfeattendancemanager.data.model.CreateStaffRequest
 import com.jaspreet.gfeattendancemanager.data.model.GenericApiResponse
 import com.jaspreet.gfeattendancemanager.data.model.PunchRequest
 import com.jaspreet.gfeattendancemanager.data.model.StaffMember
+import com.jaspreet.gfeattendancemanager.data.model.UpdateStaffRequest
 import com.jaspreet.gfeattendancemanager.util.KioskLogger
 import com.jaspreet.gfeattendancemanager.util.PreferenceManager
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +42,9 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
     private val _staffList = MutableStateFlow<List<StaffMember>>(emptyList())
     val staffList: StateFlow<List<StaffMember>> = _staffList.asStateFlow()
 
+    private val _allStaffList = MutableStateFlow<List<StaffMember>>(emptyList())
+    val allStaffList: StateFlow<List<StaffMember>> = _allStaffList.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -49,17 +54,29 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
     private val _bannerEvent = MutableSharedFlow<BannerEvent>()
     val bannerEvent: SharedFlow<BannerEvent> = _bannerEvent.asSharedFlow()
 
+    private val _syncTrigger = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val syncTrigger: SharedFlow<Unit> = _syncTrigger.asSharedFlow()
+
     var isPollingPaused: Boolean = false
         private set
 
     private var pollingJob: Job? = null
 
+    companion object {
+        @Suppress("unused")
+        private const val POLLING_INTERVAL_MS = 10_000L
+    }
+
     init {
         // Load initial data from PreferenceManager cache immediately
-        val cachedStaff = preferenceManager.getStaffList()
-        if (cachedStaff.isNotEmpty()) {
-            _staffList.value = cachedStaff
-            KioskLogger.sys("Loaded ${cachedStaff.size} cached staff members on initialization")
+        val cachedActiveStaff = preferenceManager.getActiveStaffList()
+        if (cachedActiveStaff.isNotEmpty()) {
+            _staffList.value = cachedActiveStaff
+            KioskLogger.sys("Loaded ${cachedActiveStaff.size} cached active staff members on initialization")
+        }
+        val cachedAllStaff = preferenceManager.getAllStaffList()
+        if (cachedAllStaff.isNotEmpty()) {
+            _allStaffList.value = cachedAllStaff
         }
         startPolling()
     }
@@ -67,13 +84,13 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
     fun startPolling() {
         pollingJob?.cancel()
         isPollingPaused = false
-        KioskLogger.sys("Background polling started")
+        KioskLogger.sys("Background polling started (10s interval)")
         pollingJob = viewModelScope.launch {
             while (coroutineContext.isActive) {
                 if (!isPollingPaused) {
                     fetchStaff()
                 }
-                delay(30.seconds)
+                delay(10.seconds)
             }
         }
     }
@@ -115,14 +132,15 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
                 val apiService = ApiClient.getService(baseUrl)
-                val response = apiService.getStaff()
+                val response = apiService.getStaff(all = false)
 
                 if (response.isSuccessful && response.body() != null) {
                     val list = response.body()!!
                     if (_staffList.value != list) {
-                        KioskLogger.sys("Staff data updated (${list.size} members)")
+                        KioskLogger.sys("Active staff data updated (${list.size} members)")
                         _staffList.value = list
-                        preferenceManager.saveStaffList(list)
+                        preferenceManager.saveActiveStaffList(list)
+                        _syncTrigger.emit(Unit)
                     }
                     _isOffline.value = false
                 } else {
@@ -144,15 +162,144 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun fetchAllStaff() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val baseUrl = preferenceManager.getBaseUrl()
+                val apiService = ApiClient.getService(baseUrl)
+                val response = apiService.getStaff(all = true)
+
+                if (response.isSuccessful && response.body() != null) {
+                    val list = response.body()!!
+                    KioskLogger.sys("Admin: All staff data fetched (${list.size} members)")
+                    _allStaffList.value = list
+                    preferenceManager.saveAllStaffList(list)
+                    _syncTrigger.emit(Unit)
+                } else {
+                    val errorRaw = response.errorBody()?.string()
+                    val errorMsg = parseErrorMessage(errorRaw, response.code())
+                    KioskLogger.error("Fetch all staff error: HTTP ${response.code()} - $errorMsg")
+                    loadCachedAllStaff()
+                }
+            } catch (t: Throwable) {
+                KioskLogger.error("Fetch all staff network error: ${t.localizedMessage ?: "Unknown error"}", t)
+                loadCachedAllStaff()
+            }
+        }
+    }
+
     private fun loadCachedStaff() {
         try {
-            val cached = preferenceManager.getStaffList()
+            val cached = preferenceManager.getActiveStaffList()
             if (cached.isNotEmpty()) {
                 _staffList.value = cached
-                KioskLogger.sys("Loaded ${cached.size} cached staff members")
+                KioskLogger.sys("Loaded ${cached.size} cached active staff members")
             }
         } catch (t: Throwable) {
-            KioskLogger.error("Failed to load cached staff", t)
+            KioskLogger.error("Failed to load cached active staff", t)
+        }
+    }
+
+    private fun loadCachedAllStaff() {
+        try {
+            val cached = preferenceManager.getAllStaffList()
+            if (cached.isNotEmpty()) {
+                _allStaffList.value = cached
+                KioskLogger.sys("Loaded ${cached.size} cached total staff members for Admin")
+            }
+        } catch (t: Throwable) {
+            KioskLogger.error("Failed to load cached all staff", t)
+        }
+    }
+
+    fun createStaff(
+        name: String,
+        role: String,
+        salary: Double,
+        phone: String,
+        status: String,
+        onResult: ((isSuccess: Boolean, message: String) -> Unit)? = null
+    ) {
+        val bannerMsg = "$name — Staff Created!"
+        KioskLogger.user("[CREATE STAFF OPTIMISTIC] $name ($role, ₹$salary, $status) (0ms feedback)")
+        viewModelScope.launch {
+            _bannerEvent.emit(BannerEvent(bannerMsg, true))
+        }
+        onResult?.invoke(true, bannerMsg)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val baseUrl = preferenceManager.getBaseUrl()
+                val apiService = ApiClient.getService(baseUrl)
+                val request = CreateStaffRequest(
+                    name = name,
+                    role = role,
+                    salary = salary,
+                    phone = phone,
+                    status = status
+                )
+                val response = apiService.createStaff(request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    KioskLogger.user("[CREATE STAFF SUCCESS] $name confirmed by server")
+                    fetchAllStaff()
+                    fetchStaff()
+                } else {
+                    val errorRaw = response.errorBody()?.string()
+                    val errorMsg = parseErrorMessage(errorRaw, response.code())
+                    KioskLogger.error("Create staff failed for $name: $errorMsg")
+                    _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
+                }
+            } catch (t: Throwable) {
+                val errorMsg = t.localizedMessage ?: "Network error"
+                KioskLogger.error("Create staff exception for $name: $errorMsg", t)
+                _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
+            }
+        }
+    }
+
+    fun updateStaff(
+        staffId: String,
+        name: String,
+        role: String,
+        salary: Double,
+        phone: String,
+        status: String,
+        onResult: ((isSuccess: Boolean, message: String) -> Unit)? = null
+    ) {
+        val bannerMsg = "$name — Staff Details Updated!"
+        KioskLogger.user("[UPDATE STAFF OPTIMISTIC] ID: $staffId -> $name ($role, ₹$salary, $status) (0ms feedback)")
+        viewModelScope.launch {
+            _bannerEvent.emit(BannerEvent(bannerMsg, true))
+        }
+        onResult?.invoke(true, bannerMsg)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val baseUrl = preferenceManager.getBaseUrl()
+                val apiService = ApiClient.getService(baseUrl)
+                val request = UpdateStaffRequest(
+                    name = name,
+                    role = role,
+                    salary = salary,
+                    phone = phone,
+                    status = status
+                )
+                val response = apiService.updateStaff(staffId, request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    KioskLogger.user("[UPDATE STAFF SUCCESS] $name updated on server")
+                    fetchAllStaff()
+                    fetchStaff()
+                } else {
+                    val errorRaw = response.errorBody()?.string()
+                    val errorMsg = parseErrorMessage(errorRaw, response.code())
+                    KioskLogger.error("Update staff failed for $name: $errorMsg")
+                    _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
+                }
+            } catch (t: Throwable) {
+                val errorMsg = t.localizedMessage ?: "Network error"
+                KioskLogger.error("Update staff exception for $name: $errorMsg", t)
+                _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
+            }
         }
     }
 
@@ -168,7 +315,6 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         val actionText = if (isClockIn) "IN" else "OUT"
         val currentTimeString = SimpleDateFormat("hh:mm a", Locale.US).format(Date())
 
-        // 1. Immediately (0ms) optimistic local update handling null/empty fields safely
         val updatedList = currentList.map { member ->
             if (member.id == staffId) {
                 val updatedSince = if (isClockIn) {
@@ -185,11 +331,9 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Update StateFlow & PreferenceManager cache immediately
         _staffList.value = updatedList
-        preferenceManager.saveStaffList(updatedList)
+        preferenceManager.saveActiveStaffList(updatedList)
 
-        // Emit success banner event immediately (0ms) so MainActivity displays banner & plays chime
         val bannerMsg = "$staffName — Clocked ${if (isClockIn) "IN!" else "OUT!"}"
         KioskLogger.user("[PUNCH OPTIMISTIC] $staffName — Clocked $actionText (0ms feedback)")
         viewModelScope.launch {
@@ -205,7 +349,6 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
             KioskLogger.error("Error in punch onResult callback", t)
         }
 
-        // 2. Background Network Sync (Dispatchers.IO)
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
@@ -219,9 +362,10 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                         val returnedStaff = punchResp.staff
                         if (!returnedStaff.isNullOrEmpty()) {
                             _staffList.value = returnedStaff
-                            preferenceManager.saveStaffList(returnedStaff)
+                            preferenceManager.saveActiveStaffList(returnedStaff)
                         }
                         _isOffline.value = false
+                        _syncTrigger.emit(Unit)
                     } else {
                         val errorMsg = punchResp.message ?: "Punch rejected by server"
                         KioskLogger.error("Punch rejected for $staffName: $errorMsg")
@@ -257,7 +401,6 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         val amountStr = if (amount % 1.0 == 0.0) amount.toInt().toString() else amount.toString()
         val bannerMsg = "₹$amountStr Advance recorded for $staffName"
 
-        // 1. Immediately (0ms) emit success banner event & play chime
         KioskLogger.user("[ADVANCE OPTIMISTIC] ₹$amountStr Given By $notes to $staffName (0ms feedback)")
         viewModelScope.launch {
             try {
@@ -272,7 +415,6 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
             KioskLogger.error("Error in addAdvance onResult callback", t)
         }
 
-        // 2. Background Network Sync (Dispatchers.IO)
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
