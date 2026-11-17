@@ -54,24 +54,25 @@ class ServerUrlDialog : DialogFragment() {
         binding.etServerUrl.setText(preferenceManager.getBaseUrl())
 
         binding.btnSaveUrl.setOnClickListener {
-            var newUrl = binding.etServerUrl.text?.toString()?.trim() ?: ""
-            if (newUrl.isNotBlank()) {
-                if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
-                    newUrl = "https://$newUrl"
-                }
-                if (!newUrl.endsWith("/")) {
-                    newUrl = "$newUrl/"
-                }
-                preferenceManager.setBaseUrl(newUrl)
-                ApiClient.updateBaseUrl(newUrl)
-                viewModel.fetchStaff()
-
-                KioskLogger.user("[USER ACTION] Server URL updated: $newUrl")
-                Toast.makeText(requireContext(), getString(R.string.server_url_saved_toast, newUrl), Toast.LENGTH_SHORT).show()
-                dismiss()
-            } else {
+            val rawUrl = binding.etServerUrl.text?.toString()?.trim() ?: ""
+            if (rawUrl.isBlank()) {
                 KioskLogger.warn("ServerUrlDialog: Empty URL entered")
                 Toast.makeText(requireContext(), getString(R.string.please_enter_valid_url), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            try {
+                val validatedUrl = ApiClient.validateBaseUrl(rawUrl)
+                preferenceManager.setBaseUrl(validatedUrl)
+                ApiClient.updateBaseUrl(validatedUrl)
+                viewModel.fetchStaff(forceRefresh = true)
+
+                KioskLogger.user("[USER ACTION] Server URL updated: $validatedUrl")
+                Toast.makeText(requireContext(), getString(R.string.server_url_saved_toast, validatedUrl), Toast.LENGTH_SHORT).show()
+                dismissAllowingStateLoss()
+            } catch (e: Exception) {
+                KioskLogger.error("ServerUrlDialog: Malformed URL '$rawUrl'", e)
+                Toast.makeText(requireContext(), "Invalid Base URL format. Please check and try again.", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -87,7 +88,7 @@ class ServerUrlDialog : DialogFragment() {
         }
 
         binding.btnClose.setOnClickListener {
-            dismiss()
+            dismissAllowingStateLoss()
         }
     }
 

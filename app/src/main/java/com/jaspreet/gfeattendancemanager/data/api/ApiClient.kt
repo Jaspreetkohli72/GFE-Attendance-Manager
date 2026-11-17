@@ -2,12 +2,14 @@ package com.jaspreet.gfeattendancemanager.data.api
 
 import com.jaspreet.gfeattendancemanager.util.KioskLogger
 import okhttp3.ConnectionPool
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
@@ -22,11 +24,20 @@ object ApiClient {
 
     private val okHttpClient by lazy {
         val customLogInterceptor = Interceptor { chain ->
-            val request = chain.request()
-            val method = request.method
+            val originalRequest = chain.request()
+            val method = originalRequest.method
+
+            // Add Idempotency key to POST/PUT requests if not present
+            val requestBuilder = originalRequest.newBuilder()
+            if ((method.equals("POST", ignoreCase = true) || method.equals("PUT", ignoreCase = true)) &&
+                originalRequest.header("X-Idempotency-Key") == null
+            ) {
+                requestBuilder.header("X-Idempotency-Key", UUID.randomUUID().toString())
+            }
+
+            val request = requestBuilder.build()
             val url = request.url
 
-            // For Requests: Log Method, URL, and Request Body if present
             KioskLogger.api("[API REQUEST] $method $url")
 
             val requestBody = request.body
@@ -117,6 +128,10 @@ object ApiClient {
         apiService = newRetrofit.create(KioskApiService::class.java)
     }
 
+    fun validateBaseUrl(baseUrl: String): String {
+        return formatBaseUrl(baseUrl)
+    }
+
     private fun formatBaseUrl(baseUrl: String): String {
         var formatted = baseUrl.trim()
         if (formatted.isBlank()) {
@@ -128,6 +143,10 @@ object ApiClient {
         if (!formatted.endsWith("/")) {
             formatted = "$formatted/"
         }
-        return formatted
+
+        // Validate via HttpUrl
+        val parsed = formatted.toHttpUrlOrNull()
+            ?: throw IllegalArgumentException("Invalid URL format: $baseUrl")
+        return parsed.toString()
     }
 }

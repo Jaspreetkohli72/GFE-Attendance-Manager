@@ -18,17 +18,22 @@ data class LogEntry(
 )
 
 object KioskLogger {
-    private const val MAX_LOG_HISTORY = 200
+    private const val MAX_LOG_HISTORY = 100
     private val logHistory = ConcurrentLinkedQueue<LogEntry>()
-    private val timeFormat = SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
+    private val threadLocalTimeFormat = object : ThreadLocal<SimpleDateFormat>() {
+        override fun initialValue(): SimpleDateFormat {
+            return SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
+        }
+    }
 
-    private val _logFlow = MutableSharedFlow<LogEntry>(extraBufferCapacity = 100)
+    private val _logFlow = MutableSharedFlow<LogEntry>(extraBufferCapacity = 50)
     val logFlow: SharedFlow<LogEntry> = _logFlow.asSharedFlow()
 
     fun getLogs(): List<LogEntry> = logHistory.toList()
 
     private fun addLog(type: LogType, msg: String) {
-        val timeStr = timeFormat.format(Date())
+        val timeFormatter = threadLocalTimeFormat.get() ?: SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
+        val timeStr = timeFormatter.format(Date())
         val entry = LogEntry(timeStr, type, msg)
         logHistory.add(entry)
         while (logHistory.size > MAX_LOG_HISTORY) {

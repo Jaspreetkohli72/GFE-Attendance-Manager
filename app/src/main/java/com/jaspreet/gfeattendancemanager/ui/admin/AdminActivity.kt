@@ -1,6 +1,7 @@
 package com.jaspreet.gfeattendancemanager.ui.admin
 
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
@@ -27,6 +28,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class AdminActivity : AppCompatActivity() {
 
@@ -36,6 +38,7 @@ class AdminActivity : AppCompatActivity() {
     private lateinit var soundManager: SoundManager
 
     private var bannerHideJob: Job? = null
+    private var adminInactivityJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +63,21 @@ class AdminActivity : AppCompatActivity() {
         observeViewModel()
 
         viewModel.fetchAllStaff()
+        resetAdminInactivityTimer()
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        resetAdminInactivityTimer()
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun resetAdminInactivityTimer() {
+        adminInactivityJob?.cancel()
+        adminInactivityJob = lifecycleScope.launch {
+            delay(60.seconds)
+            KioskLogger.sys("AdminActivity: 60s inactivity timeout -> Auto-locking Admin screen")
+            finish()
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -78,6 +96,7 @@ class AdminActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         adminAdapter = AdminAdapter { staffMember ->
+            if (supportFragmentManager.findFragmentByTag("EditStaffDialog") != null) return@AdminAdapter
             KioskLogger.user("[USER ACTION] AdminActivity: Edit clicked for ${staffMember.name} (ID: ${staffMember.id})")
             val dialog = EditStaffDialog.newInstance(staffMember)
             dialog.show(supportFragmentManager, "EditStaffDialog")
@@ -99,12 +118,14 @@ class AdminActivity : AppCompatActivity() {
         }
 
         binding.btnServerConfig.setOnClickListener {
+            if (supportFragmentManager.findFragmentByTag("ServerUrlDialog") != null) return@setOnClickListener
             KioskLogger.user("[USER ACTION] AdminActivity: Server config clicked")
             val dialog = ServerUrlDialog.newInstance()
             dialog.show(supportFragmentManager, "ServerUrlDialog")
         }
 
         binding.btnAddStaff.setOnClickListener {
+            if (supportFragmentManager.findFragmentByTag("CreateStaffDialog") != null) return@setOnClickListener
             KioskLogger.user("[USER ACTION] AdminActivity: Add staff clicked")
             val dialog = CreateStaffDialog.newInstance()
             dialog.show(supportFragmentManager, "CreateStaffDialog")
@@ -160,6 +181,8 @@ class AdminActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        adminInactivityJob?.cancel()
+        adminInactivityJob = null
         bannerHideJob?.cancel()
         bannerHideJob = null
         soundManager.release()

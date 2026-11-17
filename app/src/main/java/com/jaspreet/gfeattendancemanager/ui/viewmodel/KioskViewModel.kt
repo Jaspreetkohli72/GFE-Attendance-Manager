@@ -60,6 +60,9 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     private var pollingJob: Job? = null
+    private var fetchJob: Job? = null
+    @Volatile
+    private var lastMutationTime: Long = 0L
 
     companion object {
         @Suppress("unused")
@@ -87,7 +90,7 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         pollingJob = viewModelScope.launch {
             while (coroutineContext.isActive) {
                 if (!isPollingPaused) {
-                    fetchStaff()
+                    fetchStaff(forceRefresh = false)
                 }
                 delay(10.seconds)
             }
@@ -132,17 +135,20 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                     else -> 4
                 }
             }.thenBy { member ->
-                member.name.lowercase(Locale.getDefault())
+                member.name.orEmpty().lowercase(Locale.getDefault())
             }
         )
     }
 
-    fun fetchStaff() {
-        if (_isLoading.value) {
+    fun fetchStaff(forceRefresh: Boolean = false) {
+        if (_isLoading.value && !forceRefresh) {
             return
         }
+        if (forceRefresh) {
+            fetchJob?.cancel()
+        }
         _isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        fetchJob = viewModelScope.launch(Dispatchers.IO) {
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
                 val apiService = ApiClient.getService(baseUrl)
@@ -150,11 +156,14 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (response.isSuccessful && response.body() != null) {
                     val list = response.body()!!
-                    if (_staffList.value != list) {
-                        KioskLogger.sys("Active staff data updated (${list.size} members)")
-                        _staffList.value = list
-                        preferenceManager.saveActiveStaffList(list)
-                        _syncTrigger.emit(Unit)
+                    // Don't let a stale in-flight poll overwrite a recent mutation
+                    if (System.currentTimeMillis() - lastMutationTime > 3000L || forceRefresh) {
+                        if (_staffList.value != list) {
+                            KioskLogger.sys("Active staff data updated (${list.size} members)")
+                            _staffList.value = list
+                            preferenceManager.saveActiveStaffList(list)
+                            _syncTrigger.emit(Unit)
+                        }
                     }
                     _isOffline.value = false
                 } else {
@@ -166,6 +175,7 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                     loadCachedStaff()
                 }
             } catch (t: Throwable) {
+                if (t is kotlinx.coroutines.CancellationException) throw t
                 KioskLogger.error("Fetch staff network error: ${t.localizedMessage ?: "Unknown error"}", t)
                 KioskLogger.warn("Fetch staff network exception, falling back to cached staff data")
                 _isOffline.value = true
@@ -197,6 +207,7 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                     loadCachedAllStaff()
                 }
             } catch (t: Throwable) {
+                if (t is kotlinx.coroutines.CancellationException) throw t
                 KioskLogger.error("Fetch all staff network error: ${t.localizedMessage ?: "Unknown error"}", t)
                 loadCachedAllStaff()
             }
@@ -236,10 +247,14 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         status: String,
         onResult: ((isSuccess: Boolean, message: String) -> Unit)? = null
     ) {
+        lastMutationTime = System.currentTimeMillis()
+        fetchJob?.cancel()
         val bannerMsg = "$name — Staff Created!"
         KioskLogger.user("[CREATE STAFF] Submitting $name ($role, ₹$salary, $status) to server...")
 
         viewModelScope.launch(Dispatchers.IO) {
+            var isSuccess = false
+            var finalMsg = ""
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
                 val apiService = ApiClient.getService(baseUrl)
@@ -252,30 +267,31 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                 )
                 val response = apiService.createStaff(request)
                 if (response.isSuccessful && response.body()?.success == true) {
+                    isSuccess = true
+                    finalMsg = bannerMsg
                     KioskLogger.user("[CREATE STAFF SUCCESS] $name confirmed by server")
                     fetchAllStaff()
-                    fetchStaff()
-                    withContext(Dispatchers.Main) {
-                        onResult?.invoke(true, bannerMsg)
-                    }
-                    _bannerEvent.emit(BannerEvent(bannerMsg, true))
+                    fetchStaff(forceRefresh = true)
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
-                    KioskLogger.error("Create staff failed for $name: $errorMsg")
-                    withContext(Dispatchers.Main) {
-                        onResult?.invoke(false, errorMsg)
-                    }
-                    _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
+                    finalMsg = "Failed to create $name: $errorMsg"
+                    KioskLogger.error(finalMsg)
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
+                finalMsg = "Failed to create $name: $errorMsg"
                 KioskLogger.error("Create staff exception for $name: $errorMsg", t)
-                withContext(Dispatchers.Main) {
-                    onResult?.invoke(false, errorMsg)
-                }
-                _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
             }
+
+            withContext(Dispatchers.Main) {
+                try {
+                    onResult?.invoke(isSuccess, finalMsg)
+                } catch (e: Exception) {
+                    KioskLogger.error("UI callback error in createStaff", e)
+                }
+            }
+            _bannerEvent.emit(BannerEvent(finalMsg, isSuccess))
         }
     }
 
@@ -288,10 +304,14 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         status: String,
         onResult: ((isSuccess: Boolean, message: String) -> Unit)? = null
     ) {
+        lastMutationTime = System.currentTimeMillis()
+        fetchJob?.cancel()
         val bannerMsg = "$name — Staff Details Updated!"
         KioskLogger.user("[UPDATE STAFF] Submitting ID: $staffId -> $name ($role, ₹$salary, $status) to server...")
 
         viewModelScope.launch(Dispatchers.IO) {
+            var isSuccess = false
+            var finalMsg = ""
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
                 val apiService = ApiClient.getService(baseUrl)
@@ -304,30 +324,31 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                 )
                 val response = apiService.updateStaff(staffId, request)
                 if (response.isSuccessful && response.body()?.success == true) {
+                    isSuccess = true
+                    finalMsg = bannerMsg
                     KioskLogger.user("[UPDATE STAFF SUCCESS] $name updated on server")
                     fetchAllStaff()
-                    fetchStaff()
-                    withContext(Dispatchers.Main) {
-                        onResult?.invoke(true, bannerMsg)
-                    }
-                    _bannerEvent.emit(BannerEvent(bannerMsg, true))
+                    fetchStaff(forceRefresh = true)
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
-                    KioskLogger.error("Update staff failed for $name: $errorMsg")
-                    withContext(Dispatchers.Main) {
-                        onResult?.invoke(false, errorMsg)
-                    }
-                    _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
+                    finalMsg = "Failed to update $name: $errorMsg"
+                    KioskLogger.error(finalMsg)
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
+                finalMsg = "Failed to update $name: $errorMsg"
                 KioskLogger.error("Update staff exception for $name: $errorMsg", t)
-                withContext(Dispatchers.Main) {
-                    onResult?.invoke(false, errorMsg)
-                }
-                _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
             }
+
+            withContext(Dispatchers.Main) {
+                try {
+                    onResult?.invoke(isSuccess, finalMsg)
+                } catch (e: Exception) {
+                    KioskLogger.error("UI callback error in updateStaff", e)
+                }
+            }
+            _bannerEvent.emit(BannerEvent(finalMsg, isSuccess))
         }
     }
 
@@ -336,6 +357,8 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         action: String,
         onResult: ((isSuccess: Boolean, message: String) -> Unit)? = null
     ) {
+        lastMutationTime = System.currentTimeMillis()
+        fetchJob?.cancel()
         val currentList = _staffList.value
         val staffMember = currentList.find { it.id == staffId }
         val staffName = staffMember?.name?.takeIf { it.isNotBlank() } ?: staffId.ifBlank { "Staff" }
@@ -345,6 +368,8 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         KioskLogger.user("[PUNCH REQUEST] Submitting Clock $actionText for $staffName ($staffId)...")
 
         viewModelScope.launch(Dispatchers.IO) {
+            var isSuccess = false
+            var finalMsg = ""
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
                 val apiService = ApiClient.getService(baseUrl)
@@ -353,50 +378,47 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.isSuccessful && response.body() != null) {
                     val punchResp = response.body()!!
                     if (punchResp.success) {
+                        isSuccess = true
+                        finalMsg = "$staffName — Clocked $actionText"
                         val returnedStaff = punchResp.staff
                         if (!returnedStaff.isNullOrEmpty()) {
                             _staffList.value = returnedStaff
                             preferenceManager.saveActiveStaffList(returnedStaff)
                         } else {
-                            fetchStaff()
+                            fetchStaff(forceRefresh = true)
                         }
                         _isOffline.value = false
                         _syncTrigger.emit(Unit)
-                        val successMsg = "$staffName — Clocked $actionText"
-                        KioskLogger.user("[PUNCH SUCCESS] $successMsg confirmed by server")
-                        withContext(Dispatchers.Main) {
-                            onResult?.invoke(true, successMsg)
-                        }
-                        _bannerEvent.emit(BannerEvent(successMsg, true))
+                        KioskLogger.user("[PUNCH SUCCESS] $finalMsg confirmed by server")
                     } else {
                         val errorMsg = punchResp.message ?: "Punch rejected by server"
-                        KioskLogger.error("Punch rejected for $staffName: $errorMsg")
-                        fetchStaff()
-                        withContext(Dispatchers.Main) {
-                            onResult?.invoke(false, errorMsg)
-                        }
-                        _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
+                        finalMsg = "Punch failed for $staffName: $errorMsg"
+                        KioskLogger.error(finalMsg)
+                        fetchStaff(forceRefresh = true)
                     }
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
-                    KioskLogger.error("Punch failed for $staffName: HTTP ${response.code()} - $errorMsg")
-                    fetchStaff()
-                    withContext(Dispatchers.Main) {
-                        onResult?.invoke(false, errorMsg)
-                    }
-                    _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
+                    finalMsg = "Punch failed for $staffName: HTTP ${response.code()} - $errorMsg"
+                    KioskLogger.error(finalMsg)
+                    fetchStaff(forceRefresh = true)
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
+                finalMsg = "Punch failed for $staffName: $errorMsg"
                 KioskLogger.error("Punch network exception for $staffName: $errorMsg", t)
                 _isOffline.value = true
-                fetchStaff()
-                withContext(Dispatchers.Main) {
-                    onResult?.invoke(false, errorMsg)
-                }
-                _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
+                fetchStaff(forceRefresh = true)
             }
+
+            withContext(Dispatchers.Main) {
+                try {
+                    onResult?.invoke(isSuccess, finalMsg)
+                } catch (e: Exception) {
+                    KioskLogger.error("UI callback error in punch", e)
+                }
+            }
+            _bannerEvent.emit(BannerEvent(finalMsg, isSuccess))
         }
     }
 
@@ -406,12 +428,16 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
         notes: String = "Sandeep",
         onResult: ((isSuccess: Boolean, message: String) -> Unit)? = null
     ) {
+        lastMutationTime = System.currentTimeMillis()
+        fetchJob?.cancel()
         val staffName = _staffList.value.find { it.id == staffId }?.name?.takeIf { it.isNotBlank() } ?: staffId.ifBlank { "Staff" }
         val amountStr = if (amount % 1.0 == 0.0) amount.toInt().toString() else amount.toString()
 
         KioskLogger.user("[ADVANCE REQUEST] Submitting ₹$amountStr Advance (Given by $notes) for $staffName...")
 
         viewModelScope.launch(Dispatchers.IO) {
+            var isSuccess = false
+            var finalMsg = ""
             try {
                 val baseUrl = preferenceManager.getBaseUrl()
                 val apiService = ApiClient.getService(baseUrl)
@@ -420,48 +446,47 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.isSuccessful && response.body() != null) {
                     val advanceResp = response.body()!!
                     if (advanceResp.success) {
-                        val successMsg = "₹$amountStr Advance recorded for $staffName"
-                        KioskLogger.user("[ADVANCE SUCCESS] $successMsg confirmed by server")
+                        isSuccess = true
+                        finalMsg = "₹$amountStr Advance recorded for $staffName"
+                        KioskLogger.user("[ADVANCE SUCCESS] $finalMsg confirmed by server")
                         _isOffline.value = false
-                        fetchStaff()
-                        withContext(Dispatchers.Main) {
-                            onResult?.invoke(true, successMsg)
-                        }
-                        _bannerEvent.emit(BannerEvent(successMsg, true))
+                        fetchStaff(forceRefresh = true)
                     } else {
                         val msg = advanceResp.error ?: advanceResp.message ?: "Failed to record advance"
-                        KioskLogger.error("Advance rejected for $staffName: $msg")
-                        fetchStaff()
-                        withContext(Dispatchers.Main) {
-                            onResult?.invoke(false, msg)
-                        }
-                        _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $msg", false))
+                        finalMsg = "Advance failed for $staffName: $msg"
+                        KioskLogger.error(finalMsg)
+                        fetchStaff(forceRefresh = true)
                     }
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
-                    KioskLogger.error("Advance failed for $staffName: HTTP ${response.code()} - $errorMsg")
-                    fetchStaff()
-                    withContext(Dispatchers.Main) {
-                        onResult?.invoke(false, errorMsg)
-                    }
-                    _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
+                    finalMsg = "Advance failed for $staffName: HTTP ${response.code()} - $errorMsg"
+                    KioskLogger.error(finalMsg)
+                    fetchStaff(forceRefresh = true)
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
+                finalMsg = "Advance failed for $staffName: $errorMsg"
                 KioskLogger.error("Advance network exception for $staffName: $errorMsg", t)
                 _isOffline.value = true
-                fetchStaff()
-                withContext(Dispatchers.Main) {
-                    onResult?.invoke(false, errorMsg)
-                }
-                _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
+                fetchStaff(forceRefresh = true)
             }
+
+            withContext(Dispatchers.Main) {
+                try {
+                    onResult?.invoke(isSuccess, finalMsg)
+                } catch (e: Exception) {
+                    KioskLogger.error("UI callback error in addAdvance", e)
+                }
+            }
+            _bannerEvent.emit(BannerEvent(finalMsg, isSuccess))
         }
     }
 
     override fun onCleared() {
         pollingJob?.cancel()
         pollingJob = null
+        fetchJob?.cancel()
+        fetchJob = null
     }
 }

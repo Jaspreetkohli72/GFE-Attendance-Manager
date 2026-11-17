@@ -1,11 +1,13 @@
 package com.jaspreet.gfeattendancemanager.ui.dialog
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -16,6 +18,9 @@ import com.jaspreet.gfeattendancemanager.data.model.StaffMember
 import com.jaspreet.gfeattendancemanager.databinding.DialogEditStaffBinding
 import com.jaspreet.gfeattendancemanager.ui.viewmodel.KioskViewModel
 import com.jaspreet.gfeattendancemanager.util.KioskLogger
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class EditStaffDialog : DialogFragment() {
 
@@ -23,6 +28,7 @@ class EditStaffDialog : DialogFragment() {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: KioskViewModel
+    private var isSubmitting = false
 
     private var staffId: String = ""
     private var staffName: String = ""
@@ -100,10 +106,13 @@ class EditStaffDialog : DialogFragment() {
         when {
             staffStatus.startsWith("Terminated", ignoreCase = true) -> binding.rbEditTerminated.isChecked = true
             staffStatus.equals("On Leave", ignoreCase = true) -> binding.rbEditOnLeave.isChecked = true
+            staffStatus.equals("Available", ignoreCase = true) -> binding.rbEditAvailable.isChecked = true
             else -> binding.rbEditAvailable.isChecked = true
         }
 
         binding.btnSubmitEditStaff.setOnClickListener {
+            if (isSubmitting) return@setOnClickListener
+
             val newName = binding.etEditStaffName.text?.toString()?.trim() ?: staffName
             if (newName.isBlank()) {
                 Toast.makeText(requireContext(), "Please enter a valid staff name", Toast.LENGTH_SHORT).show()
@@ -111,25 +120,50 @@ class EditStaffDialog : DialogFragment() {
             }
 
             val newRole = binding.etEditStaffRole.text?.toString()?.trim()?.ifBlank { "Helper" } ?: "Helper"
-            val newSalary = binding.etEditStaffSalary.text?.toString()?.trim()?.toDoubleOrNull() ?: staffSalary
+            val newSalaryStr = binding.etEditStaffSalary.text?.toString()?.trim()
+            val newSalary = newSalaryStr?.toDoubleOrNull()
+
+            if (newSalary == null || newSalary < 0.0 || newSalary > 100000.0) {
+                Toast.makeText(requireContext(), "Daily wage must be between ₹0 and ₹100,000", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val newPhone = binding.etEditStaffPhone.text?.toString()?.trim() ?: staffPhone
 
             val newStatus = when {
-                binding.rbEditTerminated.isChecked -> "Terminated"
+                binding.rbEditTerminated.isChecked -> {
+                    if (staffStatus.startsWith("Terminated:", ignoreCase = true)) {
+                        staffStatus
+                    } else {
+                        "Terminated:${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
+                    }
+                }
                 binding.rbEditOnLeave.isChecked -> "On Leave"
-                else -> "Available"
+                binding.rbEditAvailable.isChecked -> "Available"
+                else -> staffStatus
             }
+
+            isSubmitting = true
+            binding.btnSubmitEditStaff.isEnabled = false
+            binding.btnCancelEditStaff.isEnabled = false
 
             KioskLogger.user("[USER ACTION] EditStaffDialog: Updating staff $staffId -> $newName ($newRole, ₹$newSalary, $newPhone, $newStatus)")
             viewModel.updateStaff(staffId, newName, newRole, newSalary, newPhone, newStatus) { isSuccess, _ ->
-                if (isSuccess) {
-                    dismiss()
+                if (_binding != null && isAdded) {
+                    if (isSuccess) {
+                        dismissAllowingStateLoss()
+                    } else {
+                        isSubmitting = false
+                        binding.btnSubmitEditStaff.isEnabled = true
+                        binding.btnCancelEditStaff.isEnabled = true
+                    }
                 }
             }
         }
 
         binding.btnCancelEditStaff.setOnClickListener {
-            dismiss()
+            if (isSubmitting) return@setOnClickListener
+            dismissAllowingStateLoss()
         }
     }
 
@@ -144,6 +178,15 @@ class EditStaffDialog : DialogFragment() {
 
             WindowCompat.setDecorFitsSystemWindows(this, false)
             val controller = WindowCompat.getInsetsController(this, decorView)
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+        }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        (activity as? AppCompatActivity)?.window?.let { window ->
+            val controller = WindowCompat.getInsetsController(window, window.decorView)
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.systemBars())
         }

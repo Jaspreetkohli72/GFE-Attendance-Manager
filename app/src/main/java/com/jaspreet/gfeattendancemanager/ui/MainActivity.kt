@@ -152,6 +152,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         staffAdapter = StaffButtonAdapter { staffMember ->
+            if (supportFragmentManager.findFragmentByTag("StaffActionDialog") != null) return@StaffButtonAdapter
             KioskLogger.user("[USER ACTION] Worker tile tapped: ${staffMember.name} (ID: ${staffMember.id})")
             val dialog = StaffActionDialog.newInstance(staffMember)
             dialog.show(supportFragmentManager, "StaffActionDialog")
@@ -169,22 +170,24 @@ class MainActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         binding.swipeRefresh.setOnRefreshListener {
             KioskLogger.user("[USER ACTION] Pull-to-refresh triggered")
-            viewModel.fetchStaff()
+            viewModel.fetchStaff(forceRefresh = true)
         }
 
         binding.ibRefresh.setOnClickListener {
             KioskLogger.user("[USER ACTION] Refresh button clicked")
             binding.swipeRefresh.isRefreshing = true
-            viewModel.fetchStaff()
+            viewModel.fetchStaff(forceRefresh = true)
         }
 
         binding.ibAdminShield.setOnClickListener {
+            if (supportFragmentManager.findFragmentByTag("AdminPinDialog") != null) return@setOnClickListener
             KioskLogger.user("[USER ACTION] Admin Shield clicked -> Opening AdminPinDialog")
             val dialog = AdminPinDialog.newInstance()
             dialog.show(supportFragmentManager, "AdminPinDialog")
         }
 
         binding.tvSyncStatus.setOnClickListener {
+            if (supportFragmentManager.findFragmentByTag("SyncLogDialog") != null) return@setOnClickListener
             KioskLogger.user("[USER ACTION] Sync Status clicked -> Opening SyncLogDialog")
             val dialog = SyncLogDialog.newInstance()
             dialog.show(supportFragmentManager, "SyncLogDialog")
@@ -207,9 +210,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 launch {
                     viewModel.isLoading.collect { isLoading ->
-                        if (!isLoading) {
-                            binding.swipeRefresh.isRefreshing = false
-                        }
+                        binding.swipeRefresh.isRefreshing = isLoading
                     }
                 }
                 launch {
