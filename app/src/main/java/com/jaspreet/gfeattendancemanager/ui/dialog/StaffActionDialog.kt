@@ -7,7 +7,11 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -113,6 +117,11 @@ class StaffActionDialog : DialogFragment() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
             setBackgroundDrawableResource(android.R.color.transparent)
+
+            WindowCompat.setDecorFitsSystemWindows(this, false)
+            val controller = WindowCompat.getInsetsController(this, decorView)
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
         }
     }
 
@@ -132,11 +141,32 @@ class StaffActionDialog : DialogFragment() {
         binding.btnCancel.setOnTouchListener(touchResetListener)
 
         binding.btnPrimaryAction.setOnClickListener {
-            resetInactivityTimer()
+            inactivityJob?.cancel()
             val action = if (clockedIn) "OUT" else "IN"
+            val originalText = binding.btnPrimaryAction.text.toString()
+
+            // Show loading spinner & disable buttons
+            binding.pbPrimaryAction.visibility = View.VISIBLE
+            binding.btnPrimaryAction.text = ""
+            binding.btnPrimaryAction.isEnabled = false
+            binding.btnAddAdvance.isEnabled = false
+            binding.btnCancel.isEnabled = false
+
             KioskLogger.user("[USER ACTION] StaffActionDialog: Tapped CLOCK $action for $staffName ($staffId)")
-            viewModel.punch(staffId, action)
-            dismiss()
+            viewModel.punch(staffId, action) { isSuccess, _ ->
+                if (_binding != null && isAdded) {
+                    if (isSuccess) {
+                        dismiss()
+                    } else {
+                        binding.pbPrimaryAction.visibility = View.GONE
+                        binding.btnPrimaryAction.text = originalText
+                        binding.btnPrimaryAction.isEnabled = true
+                        binding.btnAddAdvance.isEnabled = true
+                        binding.btnCancel.isEnabled = true
+                        resetInactivityTimer()
+                    }
+                }
+            }
         }
 
         binding.btnAddAdvance.setOnClickListener {
@@ -171,6 +201,12 @@ class StaffActionDialog : DialogFragment() {
         inactivityJob = null
         KioskLogger.sys("StaffActionDialog dismissed for $staffName ($staffId)")
         viewModel.resumePolling()
+
+        (activity as? AppCompatActivity)?.window?.let { window ->
+            val controller = WindowCompat.getInsetsController(window, window.decorView)
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+        }
     }
 
     override fun onDestroyView() {

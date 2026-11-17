@@ -38,18 +38,33 @@
             android:textSize="18sp"
             tools:text="Clocked IN since 09:15 AM" />
 
-        <!-- Primary Action Button (76dp height, 16dp corner radius, 22sp bold white text) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPrimaryAction"
+        <!-- Primary Action Button with Progress Spinner -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="76dp"
-            android:layout_marginTop="24dp"
-            android:textColor="@color/white"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:cornerRadius="16dp"
-            app:backgroundTint="@color/color_clock_in_stroke"
-            tools:text="CLOCK IN" />
+            android:layout_marginTop="24dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPrimaryAction"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:backgroundTint="@color/color_clock_in_stroke"
+                tools:text="CLOCK IN" />
+
+            <ProgressBar
+                android:id="@+id/pbPrimaryAction"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </FrameLayout>
 
         <!-- Advance Button (60dp height, 16dp corner radius, Amber background #F59E0B, 18sp bold text) -->
         <com.google.android.material.button.MaterialButton

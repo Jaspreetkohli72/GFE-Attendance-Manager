@@ -35,7 +35,7 @@
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
-        <!-- 4 Large Preset Buttons (56dp height, rounded 12dp corners, Slate-700 background #334155, text #F8FAFC) -->
+        <!-- 4 Large Preset Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -193,20 +193,35 @@
 
         </RadioGroup>
 
-        <!-- CONFIRM ADVANCE button (60dp height, Emerald Green background #10B981, 18sp bold text) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConfirmAdvance"
+        <!-- CONFIRM ADVANCE button container with progress spinner -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/confirm_advance"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            app:backgroundTint="@color/color_clock_in_stroke" />
+            android:layout_marginTop="24dp">
 
-        <!-- CANCEL button (Slate outline button) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnConfirmAdvance"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/confirm_advance"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/color_clock_in_stroke" />
+
+            <ProgressBar
+                android:id="@+id/pbConfirmAdvance"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </FrameLayout>
+
+        <!-- CANCEL button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"

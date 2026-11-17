@@ -1,11 +1,16 @@
 package com.jaspreet.gfeattendancemanager.ui.dialog
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.jaspreet.gfeattendancemanager.R
@@ -81,6 +86,11 @@ class AdvanceDialog : DialogFragment() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
             setBackgroundDrawableResource(android.R.color.transparent)
+
+            WindowCompat.setDecorFitsSystemWindows(this, false)
+            val controller = WindowCompat.getInsetsController(this, decorView)
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
         }
     }
 
@@ -121,15 +131,54 @@ class AdvanceDialog : DialogFragment() {
             val selectedGivenBy = selectedRadioButton?.text?.toString()?.trim()
             val notes = if (!selectedGivenBy.isNullOrBlank()) selectedGivenBy else "Sandeep"
 
+            val originalText = binding.btnConfirmAdvance.text.toString()
+
+            // Show loading spinner & disable controls
+            binding.pbConfirmAdvance.visibility = View.VISIBLE
+            binding.btnConfirmAdvance.text = ""
+            setControlsEnabled(false)
+
             KioskLogger.user("[USER ACTION] AdvanceDialog: Confirmed Advance ₹$amountText for $staffName (Given by $notes)")
-            viewModel.addAdvance(staffId, amount, notes)
-            dismiss()
-            onSuccessCallback?.invoke()
+            viewModel.addAdvance(staffId, amount, notes) { isSuccess, _ ->
+                if (_binding != null && isAdded) {
+                    if (isSuccess) {
+                        dismiss()
+                        onSuccessCallback?.invoke()
+                    } else {
+                        binding.pbConfirmAdvance.visibility = View.GONE
+                        binding.btnConfirmAdvance.text = originalText
+                        setControlsEnabled(true)
+                    }
+                }
+            }
         }
 
         binding.btnCancel.setOnClickListener {
             KioskLogger.user("[USER ACTION] AdvanceDialog: Tapped Cancel")
             dismiss()
+        }
+    }
+
+    private fun setControlsEnabled(enabled: Boolean) {
+        binding.btnConfirmAdvance.isEnabled = enabled
+        binding.btnCancel.isEnabled = enabled
+        binding.btn100.isEnabled = enabled
+        binding.btn200.isEnabled = enabled
+        binding.btn500.isEnabled = enabled
+        binding.btn1000.isEnabled = enabled
+        binding.etAmount.isEnabled = enabled
+        binding.rgGivenBy.isEnabled = enabled
+        for (i in 0 until binding.rgGivenBy.childCount) {
+            binding.rgGivenBy.getChildAt(i).isEnabled = enabled
+        }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        (activity as? AppCompatActivity)?.window?.let { window ->
+            val controller = WindowCompat.getInsetsController(window, window.decorView)
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
         }
     }
 
