@@ -32,6 +32,7 @@ class StaffActionDialog : DialogFragment() {
 
     private lateinit var viewModel: KioskViewModel
     private var inactivityJob: Job? = null
+    private var isRequestInFlight = false
 
     private var staffId: String = ""
     private var staffName: String = ""
@@ -127,6 +128,7 @@ class StaffActionDialog : DialogFragment() {
 
     private fun setupListeners() {
         val touchResetListener = View.OnTouchListener { v, event ->
+            if (isRequestInFlight) return@OnTouchListener false
             if (event.action == MotionEvent.ACTION_UP) {
                 v.performClick()
             }
@@ -141,7 +143,12 @@ class StaffActionDialog : DialogFragment() {
         binding.btnCancel.setOnTouchListener(touchResetListener)
 
         binding.btnPrimaryAction.setOnClickListener {
+            if (isRequestInFlight) return@setOnClickListener
+
+            isRequestInFlight = true
             inactivityJob?.cancel()
+            inactivityJob = null
+
             val action = if (clockedIn) "OUT" else "IN"
             val originalText = binding.btnPrimaryAction.text.toString()
 
@@ -156,8 +163,9 @@ class StaffActionDialog : DialogFragment() {
             viewModel.punch(staffId, action) { isSuccess, _ ->
                 if (_binding != null && isAdded) {
                     if (isSuccess) {
-                        dismiss()
+                        dismissAllowingStateLoss()
                     } else {
+                        isRequestInFlight = false
                         binding.pbPrimaryAction.visibility = View.GONE
                         binding.btnPrimaryAction.text = originalText
                         binding.btnPrimaryAction.isEnabled = true
@@ -170,27 +178,33 @@ class StaffActionDialog : DialogFragment() {
         }
 
         binding.btnAddAdvance.setOnClickListener {
+            if (isRequestInFlight) return@setOnClickListener
+            if (parentFragmentManager.findFragmentByTag("AdvanceDialog") != null) return@setOnClickListener
             resetInactivityTimer()
             KioskLogger.user("[USER ACTION] StaffActionDialog: Tapped ADD ADVANCE for $staffName ($staffId)")
             val advanceDialog = AdvanceDialog.newInstance(staffId, staffName) {
-                dismiss()
+                if (_binding != null && isAdded) {
+                    dismissAllowingStateLoss()
+                }
             }
             advanceDialog.show(parentFragmentManager, "AdvanceDialog")
         }
 
         binding.btnCancel.setOnClickListener {
+            if (isRequestInFlight) return@setOnClickListener
             KioskLogger.user("[USER ACTION] StaffActionDialog: Tapped Cancel for $staffName ($staffId)")
-            dismiss()
+            dismissAllowingStateLoss()
         }
     }
 
     private fun resetInactivityTimer() {
         inactivityJob?.cancel()
+        if (isRequestInFlight) return
         inactivityJob = lifecycleScope.launch {
             delay(10.seconds)
-            if (isAdded && _binding != null) {
+            if (isAdded && _binding != null && !isRequestInFlight) {
                 KioskLogger.sys("StaffActionDialog: Inactivity timeout, auto-dismissing")
-                dismiss()
+                dismissAllowingStateLoss()
             }
         }
     }

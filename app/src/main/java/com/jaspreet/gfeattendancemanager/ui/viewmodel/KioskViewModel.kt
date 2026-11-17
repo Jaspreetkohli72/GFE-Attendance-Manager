@@ -255,26 +255,26 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                     KioskLogger.user("[CREATE STAFF SUCCESS] $name confirmed by server")
                     fetchAllStaff()
                     fetchStaff()
-                    _bannerEvent.emit(BannerEvent(bannerMsg, true))
                     withContext(Dispatchers.Main) {
                         onResult?.invoke(true, bannerMsg)
                     }
+                    _bannerEvent.emit(BannerEvent(bannerMsg, true))
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
                     KioskLogger.error("Create staff failed for $name: $errorMsg")
-                    _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
                     withContext(Dispatchers.Main) {
                         onResult?.invoke(false, errorMsg)
                     }
+                    _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
                 KioskLogger.error("Create staff exception for $name: $errorMsg", t)
-                _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
                 withContext(Dispatchers.Main) {
                     onResult?.invoke(false, errorMsg)
                 }
+                _bannerEvent.emit(BannerEvent("Failed to create $name: $errorMsg", false))
             }
         }
     }
@@ -307,26 +307,26 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                     KioskLogger.user("[UPDATE STAFF SUCCESS] $name updated on server")
                     fetchAllStaff()
                     fetchStaff()
-                    _bannerEvent.emit(BannerEvent(bannerMsg, true))
                     withContext(Dispatchers.Main) {
                         onResult?.invoke(true, bannerMsg)
                     }
+                    _bannerEvent.emit(BannerEvent(bannerMsg, true))
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
                     KioskLogger.error("Update staff failed for $name: $errorMsg")
-                    _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
                     withContext(Dispatchers.Main) {
                         onResult?.invoke(false, errorMsg)
                     }
+                    _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
                 KioskLogger.error("Update staff exception for $name: $errorMsg", t)
-                _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
                 withContext(Dispatchers.Main) {
                     onResult?.invoke(false, errorMsg)
                 }
+                _bannerEvent.emit(BannerEvent("Failed to update $name: $errorMsg", false))
             }
         }
     }
@@ -364,38 +364,38 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                         _syncTrigger.emit(Unit)
                         val successMsg = "$staffName — Clocked $actionText"
                         KioskLogger.user("[PUNCH SUCCESS] $successMsg confirmed by server")
-                        _bannerEvent.emit(BannerEvent(successMsg, true))
                         withContext(Dispatchers.Main) {
                             onResult?.invoke(true, successMsg)
                         }
+                        _bannerEvent.emit(BannerEvent(successMsg, true))
                     } else {
                         val errorMsg = punchResp.message ?: "Punch rejected by server"
                         KioskLogger.error("Punch rejected for $staffName: $errorMsg")
                         fetchStaff()
-                        _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
                         withContext(Dispatchers.Main) {
                             onResult?.invoke(false, errorMsg)
                         }
+                        _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
                     }
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
                     KioskLogger.error("Punch failed for $staffName: HTTP ${response.code()} - $errorMsg")
                     fetchStaff()
-                    _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
                     withContext(Dispatchers.Main) {
                         onResult?.invoke(false, errorMsg)
                     }
+                    _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
                 KioskLogger.error("Punch network exception for $staffName: $errorMsg", t)
                 _isOffline.value = true
                 fetchStaff()
-                _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
                 withContext(Dispatchers.Main) {
                     onResult?.invoke(false, errorMsg)
                 }
+                _bannerEvent.emit(BannerEvent("Punch failed for $staffName: $errorMsg", false))
             }
         }
     }
@@ -424,38 +424,38 @@ class KioskViewModel(application: Application) : AndroidViewModel(application) {
                         KioskLogger.user("[ADVANCE SUCCESS] $successMsg confirmed by server")
                         _isOffline.value = false
                         fetchStaff()
-                        _bannerEvent.emit(BannerEvent(successMsg, true))
                         withContext(Dispatchers.Main) {
                             onResult?.invoke(true, successMsg)
                         }
+                        _bannerEvent.emit(BannerEvent(successMsg, true))
                     } else {
                         val msg = advanceResp.error ?: advanceResp.message ?: "Failed to record advance"
                         KioskLogger.error("Advance rejected for $staffName: $msg")
                         fetchStaff()
-                        _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $msg", false))
                         withContext(Dispatchers.Main) {
                             onResult?.invoke(false, msg)
                         }
+                        _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $msg", false))
                     }
                 } else {
                     val errorRaw = response.errorBody()?.string()
                     val errorMsg = parseErrorMessage(errorRaw, response.code())
                     KioskLogger.error("Advance failed for $staffName: HTTP ${response.code()} - $errorMsg")
                     fetchStaff()
-                    _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
                     withContext(Dispatchers.Main) {
                         onResult?.invoke(false, errorMsg)
                     }
+                    _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
                 }
             } catch (t: Throwable) {
                 val errorMsg = t.localizedMessage ?: "Network error"
                 KioskLogger.error("Advance network exception for $staffName: $errorMsg", t)
                 _isOffline.value = true
                 fetchStaff()
-                _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
                 withContext(Dispatchers.Main) {
                     onResult?.invoke(false, errorMsg)
                 }
+                _bannerEvent.emit(BannerEvent("Advance failed for $staffName: $errorMsg", false))
             }
         }
     }
