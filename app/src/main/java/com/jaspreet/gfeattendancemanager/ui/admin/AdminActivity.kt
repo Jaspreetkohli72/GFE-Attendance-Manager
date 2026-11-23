@@ -143,6 +143,13 @@ class AdminActivity : AppCompatActivity() {
                     viewModel.allStaffList.collect { list ->
                         adminAdapter.submitList(list)
                         binding.adminSwipeRefresh.isRefreshing = false
+                        binding.pbAdminLoading.visibility = View.GONE
+                    }
+                }
+                launch {
+                    viewModel.isLoading.collect { isLoading ->
+                        binding.adminSwipeRefresh.isRefreshing = isLoading
+                        binding.pbAdminLoading.visibility = if (isLoading && adminAdapter.itemCount == 0) View.VISIBLE else View.GONE
                     }
                 }
                 launch {

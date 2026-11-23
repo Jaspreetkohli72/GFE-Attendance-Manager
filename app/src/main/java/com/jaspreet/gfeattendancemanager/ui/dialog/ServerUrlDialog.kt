@@ -4,9 +4,11 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -53,6 +55,19 @@ class ServerUrlDialog : DialogFragment() {
 
         binding.etServerUrl.setText(preferenceManager.getBaseUrl())
 
+        binding.etServerUrl.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_GO ||
+                actionId == EditorInfo.IME_ACTION_UNSPECIFIED ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+            ) {
+                binding.btnSaveUrl.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
         binding.btnSaveUrl.setOnClickListener {
             val rawUrl = binding.etServerUrl.text?.toString()?.trim() ?: ""
             if (rawUrl.isBlank()) {
@@ -60,6 +75,11 @@ class ServerUrlDialog : DialogFragment() {
                 Toast.makeText(requireContext(), getString(R.string.please_enter_valid_url), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            binding.pbSaveUrl.visibility = View.VISIBLE
+            binding.btnSaveUrl.text = ""
+            binding.btnSaveUrl.isEnabled = false
+            binding.btnClose.isEnabled = false
 
             try {
                 val validatedUrl = ApiClient.validateBaseUrl(rawUrl)
@@ -71,6 +91,10 @@ class ServerUrlDialog : DialogFragment() {
                 Toast.makeText(requireContext(), getString(R.string.server_url_saved_toast, validatedUrl), Toast.LENGTH_SHORT).show()
                 dismissAllowingStateLoss()
             } catch (e: Exception) {
+                binding.pbSaveUrl.visibility = View.GONE
+                binding.btnSaveUrl.text = getString(R.string.save_url)
+                binding.btnSaveUrl.isEnabled = true
+                binding.btnClose.isEnabled = true
                 KioskLogger.error("ServerUrlDialog: Malformed URL '$rawUrl'", e)
                 Toast.makeText(requireContext(), "Invalid Base URL format. Please check and try again.", Toast.LENGTH_LONG).show()
             }

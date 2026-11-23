@@ -197,18 +197,34 @@
 
         </ScrollView>
 
-        <!-- Pinned Action Buttons -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSubmitEditStaff"
+        <!-- Submit Button Container with Progress Spinner -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="@string/update_staff_button"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="10dp"
-            app:backgroundTint="@color/accent_blue" />
+            android:layout_height="48dp">
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmitEditStaff"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/update_staff_button"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="10dp"
+                app:backgroundTint="@color/accent_blue" />
+
+            <ProgressBar
+                android:id="@+id/pbSubmitEditStaff"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </FrameLayout>
+
+        <!-- Cancel Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancelEditStaff"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"

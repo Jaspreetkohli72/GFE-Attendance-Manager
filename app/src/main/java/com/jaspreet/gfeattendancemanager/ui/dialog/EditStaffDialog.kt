@@ -144,6 +144,8 @@ class EditStaffDialog : DialogFragment() {
             }
 
             isSubmitting = true
+            binding.pbSubmitEditStaff.visibility = View.VISIBLE
+            binding.btnSubmitEditStaff.text = ""
             binding.btnSubmitEditStaff.isEnabled = false
             binding.btnCancelEditStaff.isEnabled = false
 
@@ -154,6 +156,8 @@ class EditStaffDialog : DialogFragment() {
                         dismissAllowingStateLoss()
                     } else {
                         isSubmitting = false
+                        binding.pbSubmitEditStaff.visibility = View.GONE
+                        binding.btnSubmitEditStaff.text = getString(R.string.update_staff_button)
                         binding.btnSubmitEditStaff.isEnabled = true
                         binding.btnCancelEditStaff.isEnabled = true
                     }

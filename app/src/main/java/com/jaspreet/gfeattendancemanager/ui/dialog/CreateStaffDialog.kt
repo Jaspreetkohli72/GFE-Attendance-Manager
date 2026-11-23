@@ -72,6 +72,8 @@ class CreateStaffDialog : DialogFragment() {
             val status = if (binding.rbOnLeave.isChecked) "On Leave" else "Available"
 
             isSubmitting = true
+            binding.pbSubmitCreateStaff.visibility = View.VISIBLE
+            binding.btnSubmitCreateStaff.text = ""
             binding.btnSubmitCreateStaff.isEnabled = false
             binding.btnCancelCreateStaff.isEnabled = false
 
@@ -82,6 +84,8 @@ class CreateStaffDialog : DialogFragment() {
                         dismissAllowingStateLoss()
                     } else {
                         isSubmitting = false
+                        binding.pbSubmitCreateStaff.visibility = View.GONE
+                        binding.btnSubmitCreateStaff.text = getString(R.string.create_staff_button)
                         binding.btnSubmitCreateStaff.isEnabled = true
                         binding.btnCancelCreateStaff.isEnabled = true
                     }

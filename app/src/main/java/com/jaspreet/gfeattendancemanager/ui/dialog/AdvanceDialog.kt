@@ -2,9 +2,11 @@ package com.jaspreet.gfeattendancemanager.ui.dialog
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -114,6 +116,19 @@ class AdvanceDialog : DialogFragment() {
     }
 
     private fun setupActionButtons() {
+        binding.etAmount.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_GO ||
+                actionId == EditorInfo.IME_ACTION_UNSPECIFIED ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+            ) {
+                binding.btnConfirmAdvance.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
         binding.btnConfirmAdvance.setOnClickListener {
             val amountText = binding.etAmount.text?.toString()?.trim() ?: ""
             val amount = amountText.toDoubleOrNull()
@@ -142,7 +157,7 @@ class AdvanceDialog : DialogFragment() {
             viewModel.addAdvance(staffId, amount, notes) { isSuccess, _ ->
                 if (_binding != null && isAdded) {
                     if (isSuccess) {
-                        dismiss()
+                        dismissAllowingStateLoss()
                         onSuccessCallback?.invoke()
                     } else {
                         binding.pbConfirmAdvance.visibility = View.GONE
@@ -155,7 +170,7 @@ class AdvanceDialog : DialogFragment() {
 
         binding.btnCancel.setOnClickListener {
             KioskLogger.user("[USER ACTION] AdvanceDialog: Tapped Cancel")
-            dismiss()
+            dismissAllowingStateLoss()
         }
     }
 

@@ -58,18 +58,33 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- SAVE URL Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSaveUrl"
+        <!-- SAVE URL Button Container with Progress Spinner -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="20dp"
-            android:text="@string/save_url"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            app:backgroundTint="@color/color_clock_in_stroke" />
+            android:layout_marginTop="20dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveUrl"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/save_url"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/color_clock_in_stroke" />
+
+            <ProgressBar
+                android:id="@+id/pbSaveUrl"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </FrameLayout>
 
         <!-- EXIT KIOSK / OPEN SYSTEM SETTINGS Button -->
         <com.google.android.material.button.MaterialButton

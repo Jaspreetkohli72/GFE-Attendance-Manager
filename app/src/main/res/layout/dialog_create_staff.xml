@@ -188,17 +188,32 @@
 
         </ScrollView>
 
-        <!-- Submit Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSubmitCreateStaff"
+        <!-- Submit Button Container with Progress Spinner -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="@string/create_staff_button"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="10dp"
-            app:backgroundTint="@color/color_clock_in_stroke" />
+            android:layout_height="48dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmitCreateStaff"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/create_staff_button"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="10dp"
+                app:backgroundTint="@color/color_clock_in_stroke" />
+
+            <ProgressBar
+                android:id="@+id/pbSubmitCreateStaff"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </FrameLayout>
 
         <!-- Cancel Button -->
         <com.google.android.material.button.MaterialButton

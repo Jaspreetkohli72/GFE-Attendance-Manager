@@ -200,6 +200,7 @@ class MainActivity : AppCompatActivity() {
                 launch {
                     viewModel.staffList.collect { list ->
                         staffAdapter.submitList(list)
+                        binding.pbMainLoading.visibility = View.GONE
                     }
                 }
                 launch {
@@ -211,6 +212,7 @@ class MainActivity : AppCompatActivity() {
                 launch {
                     viewModel.isLoading.collect { isLoading ->
                         binding.swipeRefresh.isRefreshing = isLoading
+                        binding.pbMainLoading.visibility = if (isLoading && staffAdapter.itemCount == 0) View.VISIBLE else View.GONE
                     }
                 }
                 launch {

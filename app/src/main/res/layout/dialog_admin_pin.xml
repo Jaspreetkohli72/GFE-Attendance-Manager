@@ -68,6 +68,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberPassword"
+                android:imeOptions="actionDone"
                 android:maxLength="8"
                 android:textColor="@color/text_primary"
                 android:textSize="20sp"
@@ -86,17 +87,33 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSubmitPin"
+        <!-- Submit PIN Button Container with Progress Spinner -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="20dp"
-            android:text="@string/submit_pin"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            app:backgroundTint="@color/accent_blue" />
+            android:layout_marginTop="20dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmitPin"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/submit_pin"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/accent_blue" />
+
+            <ProgressBar
+                android:id="@+id/pbSubmitPin"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </FrameLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPinCancel"

@@ -118,7 +118,7 @@
                     android:textColor="@color/text_primary"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    tools:text="⚡ 76%" />
+                    tools:text="76%" />
 
             </LinearLayout>
 
@@ -194,6 +194,19 @@
             tools:listitem="@layout/item_staff_button" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Centered Screen Progress Spinner -->
+    <ProgressBar
+        android:id="@+id/pbMainLoading"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:indeterminateTint="@color/color_clock"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerContainer"
+        tools:visibility="visible" />
 
     <!-- Floating Confirmation Overlay Banner -->
     <com.google.android.material.card.MaterialCardView

@@ -3,9 +3,11 @@ package com.jaspreet.gfeattendancemanager.ui.dialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -44,17 +46,38 @@ class AdminPinDialog : DialogFragment() {
 
         binding.tvPinError.visibility = View.GONE
 
+        binding.etPin.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_GO ||
+                actionId == EditorInfo.IME_ACTION_UNSPECIFIED ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+            ) {
+                binding.btnSubmitPin.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
         binding.btnSubmitPin.setOnClickListener {
             val enteredPin = binding.etPin.text?.toString()?.trim() ?: ""
             KioskLogger.user("[USER ACTION] AdminPinDialog: Submitted PIN")
+
+            binding.pbSubmitPin.visibility = View.VISIBLE
+            binding.btnSubmitPin.text = ""
+            binding.btnSubmitPin.isEnabled = false
+
             if (enteredPin == ADMIN_PIN) {
                 KioskLogger.user("[USER ACTION] AdminPinDialog: Correct PIN submitted, opening AdminActivity")
                 binding.tvPinError.visibility = View.GONE
-                dismiss()
+                dismissAllowingStateLoss()
                 val intent = Intent(requireContext(), AdminActivity::class.java)
                 startActivity(intent)
             } else {
                 KioskLogger.warn("AdminPinDialog: Incorrect PIN entered.")
+                binding.pbSubmitPin.visibility = View.GONE
+                binding.btnSubmitPin.text = getString(R.string.submit_pin)
+                binding.btnSubmitPin.isEnabled = true
                 binding.tvPinError.text = getString(R.string.incorrect_pin)
                 binding.tvPinError.visibility = View.VISIBLE
             }
@@ -62,7 +85,7 @@ class AdminPinDialog : DialogFragment() {
 
         binding.btnPinCancel.setOnClickListener {
             KioskLogger.user("[USER ACTION] AdminPinDialog: Cancelled PIN entry")
-            dismiss()
+            dismissAllowingStateLoss()
         }
     }
 

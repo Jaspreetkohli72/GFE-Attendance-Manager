@@ -115,6 +115,19 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <!-- Centered Admin Progress Spinner -->
+    <ProgressBar
+        android:id="@+id/pbAdminLoading"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:indeterminateTint="@color/accent_blue"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/adminHeaderContainer"
+        tools:visibility="visible" />
+
     <!-- Floating Confirmation Overlay Banner -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cvAdminBannerOverlay"
